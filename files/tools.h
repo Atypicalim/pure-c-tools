@@ -77,7 +77,7 @@ void tools_warn(const char* msg, ...) {
 void tools_log(const char* msg, ...) {
     va_list lst;
     va_start(lst, msg);
-    printf("%s %s => ", PCT_COLOR_TAG_BLUE, PCT_TAG_LOG);
+    printf("%s %s => ", PCT_COLOR_TAG_BLUE, PCT_TAG_INFO);
     vfprintf(stdout, msg, lst);
     printf("%s\n", PCT_COLOR_TAG_END);
     va_end(lst);
