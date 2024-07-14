@@ -1,5 +1,5 @@
 
-// ./files/header.h 2024-07-14 13:34:35
+// ./files/header.h 2024-07-14 14:23:16
 
 // pure c tools
 
@@ -53,7 +53,7 @@ void pct_free(void *object)
 #endif
 
 
-// ./files/tools.h 2024-07-14 13:34:35
+// ./files/tools.h 2024-07-14 14:23:16
 
 // tools
 
@@ -312,11 +312,13 @@ int file_create_directory(char *path)
 #endif
 
 
-// ./files/object.h 2024-07-14 13:34:35
+// ./files/object.h 2024-07-14 14:23:16
 
 
 #ifndef H_PCT_UG_OBJECT
 #define H_PCT_UG_OBJECT
+
+void pct_object_free_by_type(char type, void *object);
 
 typedef struct _Object {
     char objType;
@@ -363,7 +365,7 @@ void Object_release(void *_this)
         #ifdef H_PCT_OBJECT_CALLBACKS
         Object_freeByType(this->objType, this);
         #else
-        Object_free(this);
+        pct_object_free_by_type(this->objType, this);
         #endif
     }
 }
@@ -382,7 +384,7 @@ void Object_print(void *_this)
 #endif
 
 
-// ./files/string.h 2024-07-14 13:34:35
+// ./files/string.h 2024-07-14 14:23:16
 
 // string
 
@@ -817,7 +819,7 @@ String *String_trim(String *this)
 #endif
 
 
-// ./files/cursor.h 2024-07-14 13:34:35
+// ./files/cursor.h 2024-07-14 14:23:16
 
 // cursor
 
@@ -861,7 +863,7 @@ void Cursor_free(Cursor *this)
 #endif
 
 
-// ./files/hashkey.h 2024-07-14 13:34:35
+// ./files/hashkey.h 2024-07-14 14:23:16
 
 // Hashkey
 
@@ -906,7 +908,7 @@ void Hashkey_free(void *_this)
 #endif
 
 
-// ./files/hashmap.h 2024-07-14 13:34:35
+// ./files/hashmap.h 2024-07-14 14:23:16
 
 // hashmap
 
@@ -1034,7 +1036,7 @@ char *Hashmap_toString(Hashmap *this)
 #endif
 
 
-// ./files/foliage.h 2024-07-14 13:34:35
+// ./files/foliage.h 2024-07-14 14:23:16
 
 // token
 
@@ -1092,7 +1094,7 @@ void Foliage_free(Foliage *this)
 #endif
 
 
-// ./files/block.h 2024-07-14 13:34:35
+// ./files/block.h 2024-07-14 14:23:16
 
 // token
 
@@ -1210,7 +1212,7 @@ void Block_free(void *_this)
 #endif
 
 
-// ./files/queue.h 2024-07-14 13:34:35
+// ./files/queue.h 2024-07-14 14:23:16
 
 // queue
 
@@ -1329,7 +1331,7 @@ void *Queue_next(Queue *this, Cursor *cursor)
 #endif
 
 
-// ./files/stack.h 2024-07-14 13:34:35
+// ./files/stack.h 2024-07-14 14:23:16
 
 // stack
 
@@ -1473,7 +1475,7 @@ void Stack_reverse(Stack *this)
 #endif
 
 
-// ./files/array.h 2024-07-14 13:34:35
+// ./files/array.h 2024-07-14 14:23:16
 
 // array
 
@@ -1708,7 +1710,7 @@ char *Array_toString(Array *this)
 #endif
 
 
-// ./files/helpers.h 2024-07-14 13:34:35
+// ./files/helpers.h 2024-07-14 14:23:16
 
 // helpers
 
@@ -1719,6 +1721,24 @@ char *Array_toString(Array *this)
 void pct_print_some_object()
 {
     printf("test...\n");
+}
+
+// Object_initByType
+// Object_printByType
+// Object_freeByType
+void pct_object_free_by_type(char type, void *object)
+{
+    if (type == PCT_OBJ_OBJECT) return Object_free(object);
+    if (type == PCT_OBJ_STRING) return String_free(object);
+    if (type == PCT_OBJ_ARRAY) return Array_free(object);
+    if (type == PCT_OBJ_CURSOR) return Cursor_free(object);
+    if (type == PCT_OBJ_STACK) return Stack_free(object);
+    if (type == PCT_OBJ_QUEUE) return Queue_free(object);
+    if (type == PCT_OBJ_HASHKEY) return Hashkey_free(object);
+    if (type == PCT_OBJ_HASHMAP) return Hashmap_free(object);
+    if (type == PCT_OBJ_FOLIAGE) return Foliage_free(object);
+    if (type == PCT_OBJ_BLOCK) return Block_free(object);
+    Object_free(object);
 }
 
 #endif

@@ -2,6 +2,8 @@
 #ifndef H_PCT_UG_OBJECT
 #define H_PCT_UG_OBJECT
 
+void pct_object_free_by_type(char type, void *object);
+
 typedef struct _Object {
     char objType;
     int referenceCount;
@@ -47,7 +49,7 @@ void Object_release(void *_this)
         #ifdef H_PCT_OBJECT_CALLBACKS
         Object_freeByType(this->objType, this);
         #else
-        Object_free(this);
+        pct_object_free_by_type(this->objType, this);
         #endif
     }
 }
