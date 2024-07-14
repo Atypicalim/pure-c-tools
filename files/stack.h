@@ -3,7 +3,7 @@
 #ifndef H_PCT_STACK
 #define H_PCT_STACK
 
-#include "block.h"
+#include "block.h" // [M[ IGNORE ]M]
 
 typedef struct _Stack {
     struct _Object;

@@ -3,7 +3,7 @@
 #ifndef H_PCT_QUEUE
 #define H_PCT_QUEUE
 
-#include "block.h"
+#include "block.h" // [M[ IGNORE ]M]
 
 typedef struct _Queue {
     struct _Object;

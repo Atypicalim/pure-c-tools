@@ -3,15 +3,22 @@
 #ifndef H_PCT_PURE_C_TOOLS
 #define H_PCT_PURE_C_TOOLS
 
+
+
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
-#include <stdio.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <ctype.h>
 #include <stdarg.h>
 #include <limits.h>
+
+#include <math.h>
+#include <time.h>
+#include <unistd.h>
+#include <setjmp.h>
+#include <sys/stat.h>
 
 // object types
 #define PCT_OBJ_OBJECT 'O'
@@ -39,16 +46,5 @@ void pct_free(void *object)
 {
     free(object);
 }
-
-#include "../tools/object.h"
-#include "../tools/string.h"
-#include "../tools/cursor.h"
-#include "../tools/hashkey.h"
-#include "../tools/hashmap.h"
-#include "../tools/foliage.h"
-#include "../tools/block.h"
-#include "../tools/queue.h"
-#include "../tools/stack.h"
-#include "../tools/array.h"
 
 #endif
