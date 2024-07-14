@@ -7,7 +7,7 @@ tools = builder.tools
 # get inputs
 flag = "#include"
 inputs = []
-with open("./test.c", 'r') as file:
+with open("./test.h", 'r') as file:
     lines = file.readlines()
 for line in lines:
     if line.startswith("//") or "files" not in line:
@@ -30,11 +30,19 @@ def _onLine():
         return line
     return onLine
 
-# languages
-bldr = builder.code()
-bldr.setInput(inputs)
-bldr.setComment("//")
-bldr.setOutput("tools.h")
-bldr.onMacro(_onMacro())
-bldr.onLine(_onLine())
-bldr.start()
+# merge
+bldr1 = builder.code()
+bldr1.setInput(inputs)
+bldr1.setComment("//")
+bldr1.setOutput("tools.h")
+bldr1.onMacro(_onMacro())
+bldr1.onLine(_onLine())
+bldr1.start()
+
+# test
+bldr2 = builder.c()
+bldr2.setInput("./test.c")
+bldr2.setOutput('test')
+bldr2.start()
+bldr2.run()
+

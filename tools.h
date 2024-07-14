@@ -1,5 +1,5 @@
 
-// ./files/header.h 2024-07-14 14:42:27
+// ./files/header.h 2024-07-14 15:03:00
 
 // pure c tools
 
@@ -53,7 +53,7 @@ void pct_free(void *object)
 #endif
 
 
-// ./files/tools.h 2024-07-14 14:42:27
+// ./files/tools.h 2024-07-14 15:03:00
 
 // tools
 
@@ -312,7 +312,7 @@ int file_create_directory(char *path)
 #endif
 
 
-// ./files/object.h 2024-07-14 14:42:27
+// ./files/object.h 2024-07-14 15:03:00
 
 
 #ifndef H_PCT_UG_OBJECT
@@ -377,14 +377,14 @@ void Object_print(void *_this)
     #ifdef H_PCT_OBJECT_CALLBACKS
     Object_printByType(this->objType, this);
     #else
-    printf("<Object t:%c,p:%d>\n", this->objType, this);
+    printf("<Object t:%c p:%d>\n", this->objType, this);
     #endif
 }
 
 #endif
 
 
-// ./files/string.h 2024-07-14 14:42:27
+// ./files/string.h 2024-07-14 15:03:00
 
 // string
 
@@ -819,7 +819,7 @@ String *String_trim(String *this)
 #endif
 
 
-// ./files/cursor.h 2024-07-14 14:42:27
+// ./files/cursor.h 2024-07-14 15:03:00
 
 // cursor
 
@@ -863,7 +863,7 @@ void Cursor_free(Cursor *this)
 #endif
 
 
-// ./files/hashkey.h 2024-07-14 14:42:27
+// ./files/hashkey.h 2024-07-14 15:03:00
 
 // Hashkey
 
@@ -908,7 +908,7 @@ void Hashkey_free(void *_this)
 #endif
 
 
-// ./files/hashmap.h 2024-07-14 14:42:27
+// ./files/hashmap.h 2024-07-14 15:03:00
 
 // hashmap
 
@@ -1036,7 +1036,7 @@ char *Hashmap_toString(Hashmap *this)
 #endif
 
 
-// ./files/foliage.h 2024-07-14 14:42:27
+// ./files/foliage.h 2024-07-14 15:03:00
 
 // token
 
@@ -1094,7 +1094,7 @@ void Foliage_free(Foliage *this)
 #endif
 
 
-// ./files/block.h 2024-07-14 14:42:27
+// ./files/block.h 2024-07-14 15:03:00
 
 // token
 
@@ -1212,7 +1212,7 @@ void Block_free(void *_this)
 #endif
 
 
-// ./files/queue.h 2024-07-14 14:42:27
+// ./files/queue.h 2024-07-14 15:03:00
 
 // queue
 
@@ -1331,7 +1331,7 @@ void *Queue_next(Queue *this, Cursor *cursor)
 #endif
 
 
-// ./files/stack.h 2024-07-14 14:42:27
+// ./files/stack.h 2024-07-14 15:03:00
 
 // stack
 
@@ -1475,7 +1475,7 @@ void Stack_reverse(Stack *this)
 #endif
 
 
-// ./files/array.h 2024-07-14 14:42:27
+// ./files/array.h 2024-07-14 15:03:00
 
 // array
 
@@ -1710,7 +1710,7 @@ char *Array_toString(Array *this)
 #endif
 
 
-// ./files/helpers.h 2024-07-14 14:42:27
+// ./files/helpers.h 2024-07-14 15:03:00
 
 // helpers
 
