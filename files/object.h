@@ -35,14 +35,14 @@ void Object_free(void *_this)
 
 void Object_retain(void *_this)
 {
-    if (_this == NULL) pct_tools_error("null pointer to object retain");
+    if (_this == NULL) tools_error("null pointer to object retain");
     Object *this = _this;
     this->referenceCount++;
 }
 
 void Object_release(void *_this)
 {
-    if (_this == NULL) pct_tools_error("null pointer to object release");
+    if (_this == NULL) tools_error("null pointer to object release");
     Object *this = _this;
     this->referenceCount--;
     if (this->referenceCount <= 0) {
@@ -56,7 +56,7 @@ void Object_release(void *_this)
 
 void Object_print(void *_this)
 {
-    if (_this == NULL) pct_tools_error("null pointer to object print");
+    if (_this == NULL) tools_error("null pointer to object print");
     Object *this = _this;
     #ifdef H_PCT_OBJECT_CALLBACKS
     Object_printByType(this->objType, this);

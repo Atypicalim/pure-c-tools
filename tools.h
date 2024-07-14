@@ -1,5 +1,5 @@
 
-// ./files/header.h 2024-07-14 15:03:00
+// ./files/header.h 2024-07-14 20:09:45
 
 // pure c tools
 
@@ -50,10 +50,22 @@ void pct_free(void *object)
     free(object);
 }
 
+
+// \033[1;31mThis is red text.\033[0m\n
+#define __PCT_COLOR_TAG_BEGIN "\033[1;"
+#define PCT_COLOR_TAG_BLUE __PCT_COLOR_TAG_BEGIN "32m"
+#define PCT_COLOR_TAG_YELLOW __PCT_COLOR_TAG_BEGIN "33m"
+#define PCT_COLOR_TAG_RED __PCT_COLOR_TAG_BEGIN "31m"
+#define PCT_COLOR_TAG_END "\033[0m"
+
+#define PCT_TAG_LOG "[?]"
+#define PCT_TAG_WARN "[!]"
+#define PCT_TAG_ERROR "[x]"
+
 #endif
 
 
-// ./files/tools.h 2024-07-14 15:03:00
+// ./files/tools.h 2024-07-14 20:09:45
 
 // tools
 
@@ -65,9 +77,8 @@ void pct_free(void *object)
 #define PLATFORM_WINDOWS "PLATFORM_WINDOWS"
 #define PLATFORM_APPLE "PLATFORM_APPLE"
 #define PLATFORM_LINUX "PLATFORM_LINUX"
-#define PLATFORM_UNIX "PLATFORM_UNIX"
-#define PLATFORM_FREEBSD "PLATFORM_FREEBSD"
 #define PLATFORM_UNKNOWN "PLATFORM_UNKNOWN"
+
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
     #define PLATFORM_NAME PLATFORM_WINDOWS
     #define IS_WINDOWS
@@ -79,6 +90,7 @@ void pct_free(void *object)
     #define IS_LINUX
 #else
     #define PLATFORM_NAME PLATFORM_UNKNOWN
+    #define IS_UNKNOWM
 #endif
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
@@ -98,34 +110,44 @@ int pct_cstr_ends_with(const char *s, const char *test)
     return strcmp(s + slen - tlen, test);
 }
 
-void pct_tools_error(const char* msg, ...) {
+
+void tools_error(const char* msg, ...) {
     va_list lst;
     va_start(lst, msg);
-    printf("[%s] => ", "ERROR");
+    printf("%s %s => ", PCT_COLOR_TAG_RED, PCT_TAG_ERROR);
     vfprintf(stdout, msg, lst);
     printf("\n");
     va_end(lst);
     exit(1);
 }
 
-void pct_tools_assert(bool value, const char *msg, ...)
+void tools_assert(bool value, const char *msg, ...)
 {
     if (value == true) return;
     va_list lst;
     va_start(lst, msg);
-    printf("[%s] => ", "ASSERT");
+    printf("%s %s => ", PCT_COLOR_TAG_RED, PCT_TAG_ERROR);
     vfprintf(stdout, msg, lst);
-    printf("\n");
+    printf("%s\n", PCT_COLOR_TAG_END);
     va_end(lst);
     exit(1);
 }
 
-void pct_tools_warning(const char* msg, ...) {
+void tools_warn(const char* msg, ...) {
     va_list lst;
     va_start(lst, msg);
-    printf("[%s] => ", "WARNING");
+    printf("%s %s => ", PCT_COLOR_TAG_YELLOW, PCT_TAG_WARN);
     vfprintf(stdout, msg, lst);
-    printf("\n");
+    printf("%s\n", PCT_COLOR_TAG_END);
+    va_end(lst);
+}
+
+void tools_log(const char* msg, ...) {
+    va_list lst;
+    va_start(lst, msg);
+    printf("%s %s => ", PCT_COLOR_TAG_BLUE, PCT_TAG_LOG);
+    vfprintf(stdout, msg, lst);
+    printf("%s\n", PCT_COLOR_TAG_END);
     va_end(lst);
 }
 
@@ -312,7 +334,7 @@ int file_create_directory(char *path)
 #endif
 
 
-// ./files/object.h 2024-07-14 15:03:00
+// ./files/object.h 2024-07-14 20:09:45
 
 
 #ifndef H_PCT_UG_OBJECT
@@ -351,14 +373,14 @@ void Object_free(void *_this)
 
 void Object_retain(void *_this)
 {
-    if (_this == NULL) pct_tools_error("null pointer to object retain");
+    if (_this == NULL) tools_error("null pointer to object retain");
     Object *this = _this;
     this->referenceCount++;
 }
 
 void Object_release(void *_this)
 {
-    if (_this == NULL) pct_tools_error("null pointer to object release");
+    if (_this == NULL) tools_error("null pointer to object release");
     Object *this = _this;
     this->referenceCount--;
     if (this->referenceCount <= 0) {
@@ -372,7 +394,7 @@ void Object_release(void *_this)
 
 void Object_print(void *_this)
 {
-    if (_this == NULL) pct_tools_error("null pointer to object print");
+    if (_this == NULL) tools_error("null pointer to object print");
     Object *this = _this;
     #ifdef H_PCT_OBJECT_CALLBACKS
     Object_printByType(this->objType, this);
@@ -384,7 +406,7 @@ void Object_print(void *_this)
 #endif
 
 
-// ./files/string.h 2024-07-14 15:03:00
+// ./files/string.h 2024-07-14 20:09:45
 
 // string
 
@@ -819,7 +841,7 @@ String *String_trim(String *this)
 #endif
 
 
-// ./files/cursor.h 2024-07-14 15:03:00
+// ./files/cursor.h 2024-07-14 20:09:45
 
 // cursor
 
@@ -863,7 +885,7 @@ void Cursor_free(Cursor *this)
 #endif
 
 
-// ./files/hashkey.h 2024-07-14 15:03:00
+// ./files/hashkey.h 2024-07-14 20:09:45
 
 // Hashkey
 
@@ -908,7 +930,7 @@ void Hashkey_free(void *_this)
 #endif
 
 
-// ./files/hashmap.h 2024-07-14 15:03:00
+// ./files/hashmap.h 2024-07-14 20:09:45
 
 // hashmap
 
@@ -1036,7 +1058,7 @@ char *Hashmap_toString(Hashmap *this)
 #endif
 
 
-// ./files/foliage.h 2024-07-14 15:03:00
+// ./files/foliage.h 2024-07-14 20:09:45
 
 // token
 
@@ -1094,7 +1116,7 @@ void Foliage_free(Foliage *this)
 #endif
 
 
-// ./files/block.h 2024-07-14 15:03:00
+// ./files/block.h 2024-07-14 20:09:45
 
 // token
 
@@ -1212,7 +1234,7 @@ void Block_free(void *_this)
 #endif
 
 
-// ./files/queue.h 2024-07-14 15:03:00
+// ./files/queue.h 2024-07-14 20:09:45
 
 // queue
 
@@ -1331,7 +1353,7 @@ void *Queue_next(Queue *this, Cursor *cursor)
 #endif
 
 
-// ./files/stack.h 2024-07-14 15:03:00
+// ./files/stack.h 2024-07-14 20:09:45
 
 // stack
 
@@ -1475,7 +1497,7 @@ void Stack_reverse(Stack *this)
 #endif
 
 
-// ./files/array.h 2024-07-14 15:03:00
+// ./files/array.h 2024-07-14 20:09:45
 
 // array
 
@@ -1710,7 +1732,7 @@ char *Array_toString(Array *this)
 #endif
 
 
-// ./files/helpers.h 2024-07-14 15:03:00
+// ./files/helpers.h 2024-07-14 20:09:45
 
 // helpers
 

@@ -9,9 +9,8 @@
 #define PLATFORM_WINDOWS "PLATFORM_WINDOWS"
 #define PLATFORM_APPLE "PLATFORM_APPLE"
 #define PLATFORM_LINUX "PLATFORM_LINUX"
-#define PLATFORM_UNIX "PLATFORM_UNIX"
-#define PLATFORM_FREEBSD "PLATFORM_FREEBSD"
 #define PLATFORM_UNKNOWN "PLATFORM_UNKNOWN"
+
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
     #define PLATFORM_NAME PLATFORM_WINDOWS
     #define IS_WINDOWS
@@ -23,6 +22,7 @@
     #define IS_LINUX
 #else
     #define PLATFORM_NAME PLATFORM_UNKNOWN
+    #define IS_UNKNOWM
 #endif
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
@@ -42,34 +42,44 @@ int pct_cstr_ends_with(const char *s, const char *test)
     return strcmp(s + slen - tlen, test);
 }
 
-void pct_tools_error(const char* msg, ...) {
+
+void tools_error(const char* msg, ...) {
     va_list lst;
     va_start(lst, msg);
-    printf("[%s] => ", "ERROR");
+    printf("%s %s => ", PCT_COLOR_TAG_RED, PCT_TAG_ERROR);
     vfprintf(stdout, msg, lst);
     printf("\n");
     va_end(lst);
     exit(1);
 }
 
-void pct_tools_assert(bool value, const char *msg, ...)
+void tools_assert(bool value, const char *msg, ...)
 {
     if (value == true) return;
     va_list lst;
     va_start(lst, msg);
-    printf("[%s] => ", "ASSERT");
+    printf("%s %s => ", PCT_COLOR_TAG_RED, PCT_TAG_ERROR);
     vfprintf(stdout, msg, lst);
-    printf("\n");
+    printf("%s\n", PCT_COLOR_TAG_END);
     va_end(lst);
     exit(1);
 }
 
-void pct_tools_warning(const char* msg, ...) {
+void tools_warn(const char* msg, ...) {
     va_list lst;
     va_start(lst, msg);
-    printf("[%s] => ", "WARNING");
+    printf("%s %s => ", PCT_COLOR_TAG_YELLOW, PCT_TAG_WARN);
     vfprintf(stdout, msg, lst);
-    printf("\n");
+    printf("%s\n", PCT_COLOR_TAG_END);
+    va_end(lst);
+}
+
+void tools_log(const char* msg, ...) {
+    va_list lst;
+    va_start(lst, msg);
+    printf("%s %s => ", PCT_COLOR_TAG_BLUE, PCT_TAG_LOG);
+    vfprintf(stdout, msg, lst);
+    printf("%s\n", PCT_COLOR_TAG_END);
     va_end(lst);
 }
 
