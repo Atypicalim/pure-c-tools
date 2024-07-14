@@ -1,5 +1,5 @@
 
-// ./files/header.h 2024-07-14 21:08:41
+// ./files/header.h 2024-07-15 00:41:08
 
 // pure c tools
 
@@ -58,23 +58,15 @@ void pct_free(void *object)
 #define PCT_COLOR_TAG_RED __PCT_COLOR_TAG_BEGIN "31m"
 #define PCT_COLOR_TAG_END "\033[0m"
 
-#ifndef PCT_TAG_DEBUG
-#define PCT_TAG_DEBUG "[DEBUG]"
-#endif
-#ifndef PCT_TAG_INFO
-#define PCT_TAG_INFO  "[INFOO]"
-#endif
-#ifndef PCT_TAG_WARN
-#define PCT_TAG_WARN  "[WARNN]"
-#endif
-#ifndef PCT_TAG_ERROR
-#define PCT_TAG_ERROR "[ERROR]"
-#endif
+char PCT_TAG_DEBUG[] = "[DEBUG]";
+char PCT_TAG_INFO[]  = "[INFO ]";
+char PCT_TAG_WARN[]  = "[WARN ]";
+char PCT_TAG_ERROR[] = "[ERROR]";
 
 #endif
 
 
-// ./files/log.h 2024-07-14 21:08:41
+// ./files/log.h 2024-07-15 00:41:08
 
 // log
 
@@ -86,35 +78,27 @@ void pct_free(void *object)
 #include <time.h>
 
 #define PCT_LOG_VERSION "0.1.0"
-// #define PCT_LOG_USE_COLOR
 
 #define MAX_CALLBACKS 32
 
 typedef struct {
-  va_list ap;
-  const char *fmt;
-  const char *file;
-  struct tm *time;
-  void *udata;
-  int line;
   int level;
+  int line;
+  const char *file;
+  const char *fmt;
+  va_list args;
+  struct tm *time;
+  void *target;
 } log_Event;
 
-typedef void (*log_LockFn)(bool lock, void *udata);
-typedef void (*log_LogFn)(log_Event *ev);
-
-typedef struct {
-  log_LogFn fn;
-  void *udata;
-  int level;
-} Callback;
+typedef void (log_Func)(log_Event *ev);
 
 static struct {
-  void *udata;
-  log_LockFn lock;
-  int level;
   bool quiet;
-  Callback callbacks[MAX_CALLBACKS];
+  int level;
+  int color;
+  FILE *file;
+  log_Func *callbacks;
 } L;
 
 enum { PCT_LOG_DEBUG, PCT_LOG_INFO, PCT_LOG_WARN, PCT_LOG_ERROR };
@@ -128,74 +112,49 @@ static const char *level_colors[] = {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static void lock(void)   {
-  if (L.lock) { L.lock(true, L.udata); }
-}
-
-
-static void unlock(void) {
-  if (L.lock) { L.lock(false, L.udata); }
-}
-
-void log_set_lock(log_LockFn fn, void *udata) {
-  L.lock = fn;
-  L.udata = udata;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-static void stdout_callback(log_Event *ev) {
-  char buf[16];
-  buf[strftime(buf, sizeof(buf), "%H:%M:%S", ev->time)] = '\0';
-#ifdef PCT_LOG_USE_COLOR
-  fprintf(
-    ev->udata,
-    "%s %s%-2s\x1b[0m \x1b[90m%s:%d:\x1b[0m ",
-    buf, level_colors[ev->level], level_strings[ev->level],
-    ev->file, ev->line
-  );
-#else
-  fprintf(
-    ev->udata,
-    "%s %-2s %s:%d: ",
-    buf, level_strings[ev->level], ev->file, ev->line
-  );
-#endif
-  vfprintf(ev->udata, ev->fmt, ev->ap);
-  fprintf(ev->udata, "\n");
-  fflush(ev->udata);
-}
-
-
-static void file_callback(log_Event *ev) {
+static void _log_stdio_callback(log_Event *ev) {
   char buf[64];
+  buf[strftime(buf, sizeof(buf), "%H:%M:%S", ev->time)] = '\0';
+  if (L.color) {
+    fprintf(
+      ev->target,
+      "%s %s%-2s\x1b[0m \x1b[90m%s:%d:\x1b[0m ",
+      buf, level_colors[ev->level], level_strings[ev->level],
+      ev->file, ev->line
+    );
+  } else {
+    fprintf(
+      ev->target,
+      "%s %-2s %s:%d: ",
+      buf, level_strings[ev->level], ev->file, ev->line
+    );
+  }
+}
+
+
+static void _log_file_callback(log_Event *ev) {
+  if (!L.file) return;
+  char buf[128];
   buf[strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", ev->time)] = '\0';
   fprintf(
-    ev->udata,
+    ev->target,
     "%s %-2s %s:%d: ",
     buf, level_strings[ev->level], ev->file, ev->line
   );
-  vfprintf(ev->udata, ev->fmt, ev->ap);
-  fprintf(ev->udata, "\n");
-  fflush(ev->udata);
 }
 
-int log_add_callback(log_LogFn fn, void *udata, int level) {
-  for (int i = 0; i < MAX_CALLBACKS; i++) {
-    if (!L.callbacks[i].fn) {
-      L.callbacks[i] = (Callback) { fn, udata, level };
-      return 0;
-    }
-  }
-  return -1;
+static void _log_fill_args(log_Event *ev) {
+  vfprintf(ev->target, ev->fmt, ev->args);
+  fprintf(ev->target, "\n");
+  fflush(ev->target);
 }
 
-static void init_event(log_Event *ev, void *udata) {
+static void init_event(log_Event *ev, void *target) {
   if (!ev->time) {
     time_t t = time(NULL);
     ev->time = localtime(&t);
   }
-  ev->udata = udata;
+  ev->target = target;
 }
 
 void __pct_log(int level, const char *file, int line, const char *fmt, ...) {
@@ -205,27 +164,29 @@ void __pct_log(int level, const char *file, int line, const char *fmt, ...) {
     .line  = line,
     .level = level,
   };
-
-  lock();
-
+  //
   if (!L.quiet && level >= L.level) {
+    va_start(ev.args, fmt);
+    //
     init_event(&ev, stderr);
-    va_start(ev.ap, fmt);
-    stdout_callback(&ev);
-    va_end(ev.ap);
+    _log_stdio_callback(&ev);
+    _log_fill_args(&ev);
+    //
+    init_event(&ev, L.file);
+    _log_file_callback(&ev);
+    _log_fill_args(&ev);
+    //
+    va_end(ev.args);
   }
 
-  for (int i = 0; i < MAX_CALLBACKS && L.callbacks[i].fn; i++) {
-    Callback *cb = &L.callbacks[i];
-    if (level >= cb->level) {
-      init_event(&ev, cb->udata);
-      va_start(ev.ap, fmt);
-      cb->fn(&ev);
-      va_end(ev.ap);
+    log_Func *func = L.callbacks;
+    if (func != NULL && level >= L.level) {
+      init_event(&ev, NULL);
+      va_start(ev.args, fmt);
+      func(&ev);
+      va_end(ev.args);
     }
-  }
 
-  unlock();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -237,22 +198,32 @@ void __pct_log(int level, const char *file, int line, const char *fmt, ...) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int log_set_file(char *path, int level) {
-    FILE *fp = fopen(path, "w");;
-  return log_add_callback(file_callback, fp, level);
+void log_set_quiet(bool enable) {
+  L.quiet = enable;
 }
 
 void log_set_level(int level) {
   L.level = level;
 }
 
+void log_set_color(bool enabled) {
+  L.color = enabled;
+}
 
-void log_set_quiet(bool enable) {
-  L.quiet = enable;
+int log_set_file(char *path) {
+  if (!path) {
+    L.file = NULL;
+  } else {
+    L.file = fopen(path, "w");
+  }
+}
+
+int log_set_func(log_Func *func) {
+  L.callbacks = *func;
 }
 
 
-// ./files/tools.h 2024-07-14 21:08:41
+// ./files/tools.h 2024-07-15 00:41:08
 
 // tools
 
@@ -521,7 +492,7 @@ int file_create_directory(char *path)
 #endif
 
 
-// ./files/object.h 2024-07-14 21:08:41
+// ./files/object.h 2024-07-15 00:41:08
 
 
 #ifndef H_PCT_UG_OBJECT
@@ -593,7 +564,7 @@ void Object_print(void *_this)
 #endif
 
 
-// ./files/string.h 2024-07-14 21:08:41
+// ./files/string.h 2024-07-15 00:41:08
 
 // string
 
@@ -1028,7 +999,7 @@ String *String_trim(String *this)
 #endif
 
 
-// ./files/cursor.h 2024-07-14 21:08:41
+// ./files/cursor.h 2024-07-15 00:41:08
 
 // cursor
 
@@ -1072,7 +1043,7 @@ void Cursor_free(Cursor *this)
 #endif
 
 
-// ./files/hashkey.h 2024-07-14 21:08:41
+// ./files/hashkey.h 2024-07-15 00:41:08
 
 // Hashkey
 
@@ -1117,7 +1088,7 @@ void Hashkey_free(void *_this)
 #endif
 
 
-// ./files/hashmap.h 2024-07-14 21:08:41
+// ./files/hashmap.h 2024-07-15 00:41:08
 
 // hashmap
 
@@ -1245,7 +1216,7 @@ char *Hashmap_toString(Hashmap *this)
 #endif
 
 
-// ./files/foliage.h 2024-07-14 21:08:41
+// ./files/foliage.h 2024-07-15 00:41:08
 
 // token
 
@@ -1303,7 +1274,7 @@ void Foliage_free(Foliage *this)
 #endif
 
 
-// ./files/block.h 2024-07-14 21:08:41
+// ./files/block.h 2024-07-15 00:41:08
 
 // token
 
@@ -1421,7 +1392,7 @@ void Block_free(void *_this)
 #endif
 
 
-// ./files/queue.h 2024-07-14 21:08:41
+// ./files/queue.h 2024-07-15 00:41:08
 
 // queue
 
@@ -1540,7 +1511,7 @@ void *Queue_next(Queue *this, Cursor *cursor)
 #endif
 
 
-// ./files/stack.h 2024-07-14 21:08:41
+// ./files/stack.h 2024-07-15 00:41:08
 
 // stack
 
@@ -1684,7 +1655,7 @@ void Stack_reverse(Stack *this)
 #endif
 
 
-// ./files/array.h 2024-07-14 21:08:41
+// ./files/array.h 2024-07-15 00:41:08
 
 // array
 
@@ -1919,7 +1890,7 @@ char *Array_toString(Array *this)
 #endif
 
 
-// ./files/helpers.h 2024-07-14 21:08:41
+// ./files/helpers.h 2024-07-15 00:41:08
 
 // helpers
 

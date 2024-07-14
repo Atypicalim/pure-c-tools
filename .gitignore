@@ -2,3 +2,4 @@
 build
 my-build-tools/
 /*.exe
+/*.log

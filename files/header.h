@@ -55,17 +55,9 @@ void pct_free(void *object)
 #define PCT_COLOR_TAG_RED __PCT_COLOR_TAG_BEGIN "31m"
 #define PCT_COLOR_TAG_END "\033[0m"
 
-#ifndef PCT_TAG_DEBUG
-#define PCT_TAG_DEBUG "[DEBUG]"
-#endif
-#ifndef PCT_TAG_INFO
-#define PCT_TAG_INFO  "[INFOO]"
-#endif
-#ifndef PCT_TAG_WARN
-#define PCT_TAG_WARN  "[WARNN]"
-#endif
-#ifndef PCT_TAG_ERROR
-#define PCT_TAG_ERROR "[ERROR]"
-#endif
+char PCT_TAG_DEBUG[] = "[DEBUG]";
+char PCT_TAG_INFO[]  = "[INFO ]";
+char PCT_TAG_WARN[]  = "[WARN ]";
+char PCT_TAG_ERROR[] = "[ERROR]";
 
 #endif
