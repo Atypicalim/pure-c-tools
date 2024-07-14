@@ -61,7 +61,7 @@ void Object_print(void *_this)
     #ifdef H_PCT_OBJECT_CALLBACKS
     Object_printByType(this->objType, this);
     #else
-    printf("<object,type:%c,address:%d>\n", this->objType, this);
+    printf("<Object t:%c p:%d>\n", this->objType, this);
     #endif
 }
 
