@@ -50,6 +50,7 @@ void pct_free(void *object)
 
 // \033[1;31mThis is red text.\033[0m\n
 #define __PCT_COLOR_TAG_BEGIN "\033[1;"
+#define PCT_COLOR_TAG_GREEN __PCT_COLOR_TAG_BEGIN "32m"
 #define PCT_COLOR_TAG_BLUE __PCT_COLOR_TAG_BEGIN "32m"
 #define PCT_COLOR_TAG_YELLOW __PCT_COLOR_TAG_BEGIN "33m"
 #define PCT_COLOR_TAG_RED __PCT_COLOR_TAG_BEGIN "31m"

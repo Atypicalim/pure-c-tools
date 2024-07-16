@@ -2,6 +2,7 @@
 #include "./files/log.h"
 #include "./files/tools.h"
 #include "./files/object.h"
+#include "./files/cstring.h"
 #include "./files/string.h"
 #include "./files/cursor.h"
 #include "./files/hashkey.h"

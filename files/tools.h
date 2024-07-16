@@ -46,7 +46,7 @@ int pct_cstr_ends_with(const char *s, const char *test)
 void tools_error(const char* msg, ...) {
     va_list lst;
     va_start(lst, msg);
-    printf("%s %s => ", PCT_COLOR_TAG_RED, PCT_TAG_ERROR);
+    printf("%s%s%s => ", PCT_COLOR_TAG_RED, PCT_TAG_ERROR, PCT_COLOR_TAG_END);
     vfprintf(stdout, msg, lst);
     printf("\n");
     va_end(lst);
@@ -58,9 +58,9 @@ void tools_assert(bool value, const char *msg, ...)
     if (value == true) return;
     va_list lst;
     va_start(lst, msg);
-    printf("%s %s => ", PCT_COLOR_TAG_RED, PCT_TAG_ERROR);
+    printf("%s%s%s => ", PCT_COLOR_TAG_RED, PCT_TAG_ERROR, PCT_COLOR_TAG_END);
     vfprintf(stdout, msg, lst);
-    printf("%s\n", PCT_COLOR_TAG_END);
+    printf("\n");
     va_end(lst);
     exit(1);
 }
@@ -68,18 +68,27 @@ void tools_assert(bool value, const char *msg, ...)
 void tools_warn(const char* msg, ...) {
     va_list lst;
     va_start(lst, msg);
-    printf("%s %s => ", PCT_COLOR_TAG_YELLOW, PCT_TAG_WARN);
+    printf("%s%s%s => ", PCT_COLOR_TAG_YELLOW, PCT_TAG_WARN, PCT_COLOR_TAG_END);
     vfprintf(stdout, msg, lst);
-    printf("%s\n", PCT_COLOR_TAG_END);
+    printf("\n");
     va_end(lst);
 }
 
 void tools_log(const char* msg, ...) {
     va_list lst;
     va_start(lst, msg);
-    printf("%s %s => ", PCT_COLOR_TAG_BLUE, PCT_TAG_INFO);
+    printf("%s%s%s => ", PCT_COLOR_TAG_GREEN, PCT_TAG_INFO, PCT_COLOR_TAG_END);
     vfprintf(stdout, msg, lst);
-    printf("%s\n", PCT_COLOR_TAG_END);
+    printf("\n");
+    va_end(lst);
+}
+
+void tools_debug(const char* msg, ...) {
+    va_list lst;
+    va_start(lst, msg);
+    printf("%s%s%s => ", PCT_COLOR_TAG_BLUE, PCT_TAG_DEBUG, PCT_COLOR_TAG_END);
+    vfprintf(stdout, msg, lst);
+    printf("\n");
     va_end(lst);
 }
 
