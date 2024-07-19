@@ -48,7 +48,7 @@ static void _log_stdio_callback(log_Event *ev) {
   if (L.color) {
     fprintf(
       ev->target,
-      "%s %s%-2s\x1b[0m \x1b[90m%s:%d:\x1b[0m ",
+      "%s %s%-2s\x1b[0m \x1b[90m%s:%03d:\x1b[0m ",
       buf, level_colors[ev->level], level_strings[ev->level],
       ev->file, ev->line
     );
