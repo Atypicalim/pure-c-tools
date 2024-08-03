@@ -1,5 +1,5 @@
 
-// ./files/header.h 2024-07-19 21:33:57
+// ./files/header.h 2024-08-03 18:20:04
 
 // pure c tools
 
@@ -67,7 +67,7 @@ char PCT_TAG_ERROR[] = "[ERROR]";
 #endif
 
 
-// ./files/log.h 2024-07-19 21:33:57
+// ./files/log.h 2024-08-03 18:20:04
 
 // log
 
@@ -224,7 +224,7 @@ int log_set_func(log_Func *func) {
 }
 
 
-// ./files/tools.h 2024-07-19 21:33:57
+// ./files/tools.h 2024-08-03 18:20:04
 
 // tools
 
@@ -502,7 +502,7 @@ int file_create_directory(char *path)
 #endif
 
 
-// ./files/object.h 2024-07-19 21:33:57
+// ./files/object.h 2024-08-03 18:20:04
 
 
 #ifndef H_PCT_UG_OBJECT
@@ -574,7 +574,7 @@ void Object_print(void *_this)
 #endif
 
 
-// ./files/cstring.h 2024-07-19 21:33:57
+// ./files/cstring.h 2024-08-03 18:20:04
 
 
 // HEADER ---------------------------------------------------------------------
@@ -1053,7 +1053,7 @@ uint64_t strhash(const char *str) {
 
 
 
-// ./files/string.h 2024-07-19 21:33:58
+// ./files/string.h 2024-08-03 18:20:04
 
 // string
 
@@ -1488,7 +1488,7 @@ String *String_trim(String *this)
 #endif
 
 
-// ./files/cursor.h 2024-07-19 21:33:58
+// ./files/cursor.h 2024-08-03 18:20:04
 
 // cursor
 
@@ -1532,7 +1532,7 @@ void Cursor_free(Cursor *this)
 #endif
 
 
-// ./files/hashkey.h 2024-07-19 21:33:58
+// ./files/hashkey.h 2024-08-03 18:20:04
 
 // Hashkey
 
@@ -1577,7 +1577,7 @@ void Hashkey_free(void *_this)
 #endif
 
 
-// ./files/hashmap.h 2024-07-19 21:33:58
+// ./files/hashmap.h 2024-08-03 18:20:04
 
 // hashmap
 
@@ -1589,12 +1589,14 @@ void Hashkey_free(void *_this)
 typedef struct _Hashmap {
     struct _Object;
     int size;
+    bool retain;
     Hashkey *position;
 } Hashmap;
 
-Hashmap* Hashmap_new() {
+Hashmap* Hashmap_new(bool isRetainValue) {
     Hashmap *map = (Hashmap *)pct_mallloc(sizeof(Hashmap) * HASHMAP_DEFAULT_CAPACITY);
     map->size = HASHMAP_DEFAULT_CAPACITY;
+    map->retain = isRetainValue;
     for (int i = 0; i < map->size; ++i ) map[i].position = NULL;
     Object_init(map, PCT_OBJ_HASHMAP);
     return map;
@@ -1610,6 +1612,9 @@ void Hashmap_free(Hashmap *this) {
         while (ptr != NULL) {
             tmp = ptr;
             ptr = ptr->next;
+            if (this->retain) {
+                Object_release(tmp->value);
+            }
             Object_release(tmp);
         }
     }
@@ -1622,6 +1627,9 @@ void *Hashmap_set(Hashmap *this, char *_key, void *value) {
     assert(value != NULL);
     String *key = String_format(_key);
     int pos = String_hash(key) % HASHMAP_DEFAULT_CAPACITY;
+    if (this->retain) {
+        Object_retain(value);
+    }
     //
     void *tmp = NULL;
     Hashkey *ptr = this[pos].position;
@@ -1633,6 +1641,9 @@ void *Hashmap_set(Hashmap *this, char *_key, void *value) {
     while (ptr != NULL) {
         if (String_equal(key, ptr->key)) {
             tmp = ptr->value;
+            if (this->retain) {
+                Object_release(ptr->value);
+            }
             Hashkey_set(ptr, value);
             Object_release(key);
             // TODO: release tmp
@@ -1687,6 +1698,9 @@ void *Hashmap_del(Hashmap *this, char *_key) {
                 pre->next = ptr->next;
             }
             tmp = ptr->value;
+            if (this->retain) {
+                Object_release(ptr->value);
+            }
             Object_release(ptr);
             break;
         }
@@ -1705,7 +1719,7 @@ char *Hashmap_toString(Hashmap *this)
 #endif
 
 
-// ./files/foliage.h 2024-07-19 21:33:58
+// ./files/foliage.h 2024-08-03 18:20:04
 
 // token
 
@@ -1763,7 +1777,7 @@ void Foliage_free(Foliage *this)
 #endif
 
 
-// ./files/block.h 2024-07-19 21:33:58
+// ./files/block.h 2024-08-03 18:20:04
 
 // token
 
@@ -1881,7 +1895,7 @@ void Block_free(void *_this)
 #endif
 
 
-// ./files/queue.h 2024-07-19 21:33:58
+// ./files/queue.h 2024-08-03 18:20:04
 
 // queue
 
@@ -2000,7 +2014,7 @@ void *Queue_next(Queue *this, Cursor *cursor)
 #endif
 
 
-// ./files/stack.h 2024-07-19 21:33:58
+// ./files/stack.h 2024-08-03 18:20:04
 
 // stack
 
@@ -2144,7 +2158,7 @@ void Stack_reverse(Stack *this)
 #endif
 
 
-// ./files/array.h 2024-07-19 21:33:58
+// ./files/array.h 2024-08-03 18:20:04
 
 // array
 
@@ -2379,7 +2393,7 @@ char *Array_toString(Array *this)
 #endif
 
 
-// ./files/helpers.h 2024-07-19 21:33:58
+// ./files/helpers.h 2024-08-03 18:20:04
 
 // helpers
 

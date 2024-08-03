@@ -8,12 +8,14 @@
 typedef struct _Hashmap {
     struct _Object;
     int size;
+    bool retain;
     Hashkey *position;
 } Hashmap;
 
-Hashmap* Hashmap_new() {
+Hashmap* Hashmap_new(bool isRetainValue) {
     Hashmap *map = (Hashmap *)pct_mallloc(sizeof(Hashmap) * HASHMAP_DEFAULT_CAPACITY);
     map->size = HASHMAP_DEFAULT_CAPACITY;
+    map->retain = isRetainValue;
     for (int i = 0; i < map->size; ++i ) map[i].position = NULL;
     Object_init(map, PCT_OBJ_HASHMAP);
     return map;
@@ -29,6 +31,9 @@ void Hashmap_free(Hashmap *this) {
         while (ptr != NULL) {
             tmp = ptr;
             ptr = ptr->next;
+            if (this->retain) {
+                Object_release(tmp->value);
+            }
             Object_release(tmp);
         }
     }
@@ -41,6 +46,9 @@ void *Hashmap_set(Hashmap *this, char *_key, void *value) {
     assert(value != NULL);
     String *key = String_format(_key);
     int pos = String_hash(key) % HASHMAP_DEFAULT_CAPACITY;
+    if (this->retain) {
+        Object_retain(value);
+    }
     //
     void *tmp = NULL;
     Hashkey *ptr = this[pos].position;
@@ -52,6 +60,9 @@ void *Hashmap_set(Hashmap *this, char *_key, void *value) {
     while (ptr != NULL) {
         if (String_equal(key, ptr->key)) {
             tmp = ptr->value;
+            if (this->retain) {
+                Object_release(ptr->value);
+            }
             Hashkey_set(ptr, value);
             Object_release(key);
             // TODO: release tmp
@@ -106,6 +117,9 @@ void *Hashmap_del(Hashmap *this, char *_key) {
                 pre->next = ptr->next;
             }
             tmp = ptr->value;
+            if (this->retain) {
+                Object_release(ptr->value);
+            }
             Object_release(ptr);
             break;
         }
