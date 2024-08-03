@@ -58,7 +58,7 @@ void Object_echo(void *_this)
 {
     if (_this == NULL) tools_error("null pointer to object echo");
     Object *this = _this;
-    printf("<Object t:%c p:%d>\n", this->objType, this);
+    printf("<Object t:%c p:%p>\n", this->objType, this);
 }
 
 void Object_print(void *_this)
