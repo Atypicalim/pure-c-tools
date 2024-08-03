@@ -54,6 +54,13 @@ void Object_release(void *_this)
     }
 }
 
+void Object_echo(void *_this)
+{
+    if (_this == NULL) tools_error("null pointer to object echo");
+    Object *this = _this;
+    printf("<Object t:%c p:%d>\n", this->objType, this);
+}
+
 void Object_print(void *_this)
 {
     if (_this == NULL) tools_error("null pointer to object print");
@@ -61,7 +68,7 @@ void Object_print(void *_this)
     #ifdef H_PCT_OBJECT_CALLBACKS
     Object_printByType(this->objType, this);
     #else
-    printf("<Object t:%c p:%d>\n", this->objType, this);
+    Object_echo(this);
     #endif
 }
 

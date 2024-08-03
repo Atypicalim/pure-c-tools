@@ -1,5 +1,5 @@
 
-// ./files/header.h 2024-08-03 18:20:04
+// ./files/header.h 2024-08-03 22:48:46
 
 // pure c tools
 
@@ -67,7 +67,7 @@ char PCT_TAG_ERROR[] = "[ERROR]";
 #endif
 
 
-// ./files/log.h 2024-08-03 18:20:04
+// ./files/log.h 2024-08-03 22:48:46
 
 // log
 
@@ -224,7 +224,7 @@ int log_set_func(log_Func *func) {
 }
 
 
-// ./files/tools.h 2024-08-03 18:20:04
+// ./files/tools.h 2024-08-03 22:48:46
 
 // tools
 
@@ -502,7 +502,7 @@ int file_create_directory(char *path)
 #endif
 
 
-// ./files/object.h 2024-08-03 18:20:04
+// ./files/object.h 2024-08-03 22:48:46
 
 
 #ifndef H_PCT_UG_OBJECT
@@ -560,6 +560,13 @@ void Object_release(void *_this)
     }
 }
 
+void Object_echo(void *_this)
+{
+    if (_this == NULL) tools_error("null pointer to object echo");
+    Object *this = _this;
+    printf("<Object t:%c p:%d>\n", this->objType, this);
+}
+
 void Object_print(void *_this)
 {
     if (_this == NULL) tools_error("null pointer to object print");
@@ -567,14 +574,14 @@ void Object_print(void *_this)
     #ifdef H_PCT_OBJECT_CALLBACKS
     Object_printByType(this->objType, this);
     #else
-    printf("<Object t:%c p:%d>\n", this->objType, this);
+    Object_echo(this);
     #endif
 }
 
 #endif
 
 
-// ./files/cstring.h 2024-08-03 18:20:04
+// ./files/cstring.h 2024-08-03 22:48:46
 
 
 // HEADER ---------------------------------------------------------------------
@@ -1053,7 +1060,7 @@ uint64_t strhash(const char *str) {
 
 
 
-// ./files/string.h 2024-08-03 18:20:04
+// ./files/string.h 2024-08-03 22:48:46
 
 // string
 
@@ -1488,7 +1495,7 @@ String *String_trim(String *this)
 #endif
 
 
-// ./files/cursor.h 2024-08-03 18:20:04
+// ./files/cursor.h 2024-08-03 22:48:46
 
 // cursor
 
@@ -1532,7 +1539,7 @@ void Cursor_free(Cursor *this)
 #endif
 
 
-// ./files/hashkey.h 2024-08-03 18:20:04
+// ./files/hashkey.h 2024-08-03 22:48:46
 
 // Hashkey
 
@@ -1577,7 +1584,7 @@ void Hashkey_free(void *_this)
 #endif
 
 
-// ./files/hashmap.h 2024-08-03 18:20:04
+// ./files/hashmap.h 2024-08-03 22:48:46
 
 // hashmap
 
@@ -1719,7 +1726,7 @@ char *Hashmap_toString(Hashmap *this)
 #endif
 
 
-// ./files/foliage.h 2024-08-03 18:20:04
+// ./files/foliage.h 2024-08-03 22:48:46
 
 // token
 
@@ -1777,7 +1784,7 @@ void Foliage_free(Foliage *this)
 #endif
 
 
-// ./files/block.h 2024-08-03 18:20:04
+// ./files/block.h 2024-08-03 22:48:46
 
 // token
 
@@ -1895,7 +1902,7 @@ void Block_free(void *_this)
 #endif
 
 
-// ./files/queue.h 2024-08-03 18:20:04
+// ./files/queue.h 2024-08-03 22:48:46
 
 // queue
 
@@ -2014,7 +2021,7 @@ void *Queue_next(Queue *this, Cursor *cursor)
 #endif
 
 
-// ./files/stack.h 2024-08-03 18:20:04
+// ./files/stack.h 2024-08-03 22:48:46
 
 // stack
 
@@ -2158,7 +2165,7 @@ void Stack_reverse(Stack *this)
 #endif
 
 
-// ./files/array.h 2024-08-03 18:20:04
+// ./files/array.h 2024-08-03 22:48:46
 
 // array
 
@@ -2393,7 +2400,7 @@ char *Array_toString(Array *this)
 #endif
 
 
-// ./files/helpers.h 2024-08-03 18:20:04
+// ./files/helpers.h 2024-08-03 22:48:46
 
 // helpers
 
