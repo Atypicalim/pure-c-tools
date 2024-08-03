@@ -2,7 +2,8 @@
 #ifndef H_PCT_UG_OBJECT
 #define H_PCT_UG_OBJECT
 
-void pct_object_free_by_type(char type, void *object);
+void pct_object_free(void *object);
+void pct_object_print(void *object);
 
 typedef struct _Object {
     char objType;
@@ -49,16 +50,9 @@ void Object_release(void *_this)
         #ifdef H_PCT_OBJECT_CALLBACKS
         Object_freeByType(this->objType, this);
         #else
-        pct_object_free_by_type(this->objType, this);
+        pct_object_free(this);
         #endif
     }
-}
-
-void Object_echo(void *_this)
-{
-    if (_this == NULL) tools_error("null pointer to object echo");
-    Object *this = _this;
-    printf("<Object t:%c p:%p>\n", this->objType, this);
 }
 
 void Object_print(void *_this)
@@ -68,7 +62,7 @@ void Object_print(void *_this)
     #ifdef H_PCT_OBJECT_CALLBACKS
     Object_printByType(this->objType, this);
     #else
-    Object_echo(this);
+    pct_object_print(this);
     #endif
 }
 

@@ -1,5 +1,5 @@
 
-// ./files/header.h 2024-08-03 22:51:44
+// ./files/header.h 2024-08-03 23:54:46
 
 // pure c tools
 
@@ -67,7 +67,7 @@ char PCT_TAG_ERROR[] = "[ERROR]";
 #endif
 
 
-// ./files/log.h 2024-08-03 22:51:44
+// ./files/log.h 2024-08-03 23:54:46
 
 // log
 
@@ -224,7 +224,7 @@ int log_set_func(log_Func *func) {
 }
 
 
-// ./files/tools.h 2024-08-03 22:51:44
+// ./files/tools.h 2024-08-03 23:54:46
 
 // tools
 
@@ -502,13 +502,14 @@ int file_create_directory(char *path)
 #endif
 
 
-// ./files/object.h 2024-08-03 22:51:44
+// ./files/object.h 2024-08-03 23:54:46
 
 
 #ifndef H_PCT_UG_OBJECT
 #define H_PCT_UG_OBJECT
 
-void pct_object_free_by_type(char type, void *object);
+void pct_object_free(void *object);
+void pct_object_print(void *object);
 
 typedef struct _Object {
     char objType;
@@ -555,16 +556,9 @@ void Object_release(void *_this)
         #ifdef H_PCT_OBJECT_CALLBACKS
         Object_freeByType(this->objType, this);
         #else
-        pct_object_free_by_type(this->objType, this);
+        pct_object_free(this);
         #endif
     }
-}
-
-void Object_echo(void *_this)
-{
-    if (_this == NULL) tools_error("null pointer to object echo");
-    Object *this = _this;
-    printf("<Object t:%c p:%p>\n", this->objType, this);
 }
 
 void Object_print(void *_this)
@@ -574,14 +568,14 @@ void Object_print(void *_this)
     #ifdef H_PCT_OBJECT_CALLBACKS
     Object_printByType(this->objType, this);
     #else
-    Object_echo(this);
+    pct_object_print(this);
     #endif
 }
 
 #endif
 
 
-// ./files/cstring.h 2024-08-03 22:51:44
+// ./files/cstring.h 2024-08-03 23:54:46
 
 
 // HEADER ---------------------------------------------------------------------
@@ -1060,7 +1054,7 @@ uint64_t strhash(const char *str) {
 
 
 
-// ./files/string.h 2024-08-03 22:51:44
+// ./files/string.h 2024-08-03 23:54:46
 
 // string
 
@@ -1495,7 +1489,7 @@ String *String_trim(String *this)
 #endif
 
 
-// ./files/cursor.h 2024-08-03 22:51:44
+// ./files/cursor.h 2024-08-03 23:54:46
 
 // cursor
 
@@ -1539,7 +1533,7 @@ void Cursor_free(Cursor *this)
 #endif
 
 
-// ./files/hashkey.h 2024-08-03 22:51:44
+// ./files/hashkey.h 2024-08-03 23:54:46
 
 // Hashkey
 
@@ -1584,7 +1578,7 @@ void Hashkey_free(void *_this)
 #endif
 
 
-// ./files/hashmap.h 2024-08-03 22:51:44
+// ./files/hashmap.h 2024-08-03 23:54:46
 
 // hashmap
 
@@ -1726,7 +1720,7 @@ char *Hashmap_toString(Hashmap *this)
 #endif
 
 
-// ./files/foliage.h 2024-08-03 22:51:44
+// ./files/foliage.h 2024-08-03 23:54:46
 
 // token
 
@@ -1784,7 +1778,7 @@ void Foliage_free(Foliage *this)
 #endif
 
 
-// ./files/block.h 2024-08-03 22:51:44
+// ./files/block.h 2024-08-03 23:54:46
 
 // token
 
@@ -1902,7 +1896,7 @@ void Block_free(void *_this)
 #endif
 
 
-// ./files/queue.h 2024-08-03 22:51:44
+// ./files/queue.h 2024-08-03 23:54:46
 
 // queue
 
@@ -2021,7 +2015,7 @@ void *Queue_next(Queue *this, Cursor *cursor)
 #endif
 
 
-// ./files/stack.h 2024-08-03 22:51:44
+// ./files/stack.h 2024-08-03 23:54:46
 
 // stack
 
@@ -2165,7 +2159,7 @@ void Stack_reverse(Stack *this)
 #endif
 
 
-// ./files/array.h 2024-08-03 22:51:44
+// ./files/array.h 2024-08-03 23:54:46
 
 // array
 
@@ -2400,7 +2394,7 @@ char *Array_toString(Array *this)
 #endif
 
 
-// ./files/helpers.h 2024-08-03 22:51:44
+// ./files/helpers.h 2024-08-03 23:54:46
 
 // helpers
 
@@ -2416,19 +2410,31 @@ void pct_print_some_object()
 // Object_initByType
 // Object_printByType
 // Object_freeByType
-void pct_object_free_by_type(char type, void *object)
+void pct_object_free(void *_this)
 {
-    if (type == PCT_OBJ_OBJECT) return Object_free(object);
-    if (type == PCT_OBJ_STRING) return String_free(object);
-    if (type == PCT_OBJ_ARRAY) return Array_free(object);
-    if (type == PCT_OBJ_CURSOR) return Cursor_free(object);
-    if (type == PCT_OBJ_STACK) return Stack_free(object);
-    if (type == PCT_OBJ_QUEUE) return Queue_free(object);
-    if (type == PCT_OBJ_HASHKEY) return Hashkey_free(object);
-    if (type == PCT_OBJ_HASHMAP) return Hashmap_free(object);
-    if (type == PCT_OBJ_FOLIAGE) return Foliage_free(object);
-    if (type == PCT_OBJ_BLOCK) return Block_free(object);
-    Object_free(object);
+    if (_this == NULL) tools_error("null pointer to object free");
+    Object *this = _this;
+    int type = this->objType;
+    if (type == PCT_OBJ_OBJECT) return Object_free(this);
+    if (type == PCT_OBJ_STRING) return String_free(this);
+    if (type == PCT_OBJ_ARRAY) return Array_free(this);
+    if (type == PCT_OBJ_CURSOR) return Cursor_free(this);
+    if (type == PCT_OBJ_STACK) return Stack_free(this);
+    if (type == PCT_OBJ_QUEUE) return Queue_free(this);
+    if (type == PCT_OBJ_HASHKEY) return Hashkey_free(this);
+    if (type == PCT_OBJ_HASHMAP) return Hashmap_free(this);
+    if (type == PCT_OBJ_FOLIAGE) return Foliage_free(this);
+    if (type == PCT_OBJ_BLOCK) return Block_free(this);
+    Object_free(this);
+}
+
+void pct_object_print(void *_this)
+{
+    if (_this == NULL) tools_error("null pointer to object print");
+    Object *this = _this;
+    int type = this->objType;
+    int count = this->referenceCount;
+    printf("<Object t:%c c:%i p:%p>\n", type, count, this);
 }
 
 #endif
