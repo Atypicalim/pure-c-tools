@@ -36,7 +36,7 @@ void pct_object_print(void *_this)
     if (_this == NULL) tools_error("null pointer to object print");
     Object *this = _this;
     int type = this->objType;
-    int count = this->referenceCount;
+    int count = this->gcCount;
     printf("<Object t:%c c:%i p:%p>\n", type, count, this);
 }
 

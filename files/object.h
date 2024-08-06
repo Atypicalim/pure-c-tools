@@ -7,14 +7,18 @@ void pct_object_print(void *object);
 
 typedef struct _Object {
     char objType;
-    int referenceCount;
+    int gcCount;
+    char gcMark;
+    void* gcNext;
 } Object;
 
 void Object_init(void *_this, char _objType)
 {
     Object *this = _this;
     this->objType = _objType;
-    this->referenceCount = 1;
+    this->gcCount = 1;
+    this->gcMark = 0;
+    this->gcNext = NULL;
     #ifdef H_PCT_OBJECT_CALLBACKS
     Object_initByType(this->objType, this);
     #endif
@@ -38,15 +42,15 @@ void Object_retain(void *_this)
 {
     if (_this == NULL) tools_error("null pointer to object retain");
     Object *this = _this;
-    this->referenceCount++;
+    this->gcCount++;
 }
 
 void Object_release(void *_this)
 {
     if (_this == NULL) tools_error("null pointer to object release");
     Object *this = _this;
-    this->referenceCount--;
-    if (this->referenceCount <= 0) {
+    this->gcCount--;
+    if (this->gcCount <= 0) {
         #ifdef H_PCT_OBJECT_CALLBACKS
         Object_freeByType(this->objType, this);
         #else

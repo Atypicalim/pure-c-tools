@@ -138,4 +138,16 @@ void Stack_reverse(Stack *this)
     Object_release(queue);
 }
 
+
+typedef void (*STACK_FOREACH_FUNC)(void *, void *);
+
+void Stack_foreachItem(Stack *this, STACK_FOREACH_FUNC func, void *arg) {
+    Cursor *cursor = Stack_reset(this);
+    void *ptr = NULL;
+    while ((ptr = Stack_next(this, cursor)) != NULL) {
+        func(ptr, arg);
+    }
+    Cursor_free(cursor);
+}
+
 #endif

@@ -130,9 +130,9 @@ void *Hashmap_del(Hashmap *this, char *_key) {
     return tmp;
 }
 
-typedef void (*HASHMAP_FUNC)(Hashkey *, void *);
+typedef void (*HASHMAP_FOREACH_FUNC)(Hashkey *, void *);
 
-void Hashmap_foreachHashkey(Hashmap *this, HASHMAP_FUNC func, void *arg) {
+void Hashmap_foreachItem(Hashmap *this, HASHMAP_FOREACH_FUNC func, void *arg) {
     Hashkey *ptr;
     for (int i = 0; i < HASHMAP_DEFAULT_CAPACITY; ++i) {
         ptr = this[i].position;

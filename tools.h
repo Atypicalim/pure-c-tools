@@ -1,5 +1,5 @@
 
-// ./files/header.h 2024-08-04 01:39:14
+// ./files/header.h 2024-08-06 20:19:18
 
 // pure c tools
 
@@ -67,7 +67,7 @@ char PCT_TAG_ERROR[] = "[ERROR]";
 #endif
 
 
-// ./files/log.h 2024-08-04 01:39:14
+// ./files/log.h 2024-08-06 20:19:18
 
 // log
 
@@ -224,7 +224,7 @@ int log_set_func(log_Func *func) {
 }
 
 
-// ./files/tools.h 2024-08-04 01:39:14
+// ./files/tools.h 2024-08-06 20:19:18
 
 // tools
 
@@ -502,7 +502,7 @@ int file_create_directory(char *path)
 #endif
 
 
-// ./files/object.h 2024-08-04 01:39:14
+// ./files/object.h 2024-08-06 20:19:18
 
 
 #ifndef H_PCT_UG_OBJECT
@@ -513,14 +513,18 @@ void pct_object_print(void *object);
 
 typedef struct _Object {
     char objType;
-    int referenceCount;
+    int gcCount;
+    char gcMark;
+    void* gcNext;
 } Object;
 
 void Object_init(void *_this, char _objType)
 {
     Object *this = _this;
     this->objType = _objType;
-    this->referenceCount = 1;
+    this->gcCount = 1;
+    this->gcMark = 0;
+    this->gcNext = NULL;
     #ifdef H_PCT_OBJECT_CALLBACKS
     Object_initByType(this->objType, this);
     #endif
@@ -544,15 +548,15 @@ void Object_retain(void *_this)
 {
     if (_this == NULL) tools_error("null pointer to object retain");
     Object *this = _this;
-    this->referenceCount++;
+    this->gcCount++;
 }
 
 void Object_release(void *_this)
 {
     if (_this == NULL) tools_error("null pointer to object release");
     Object *this = _this;
-    this->referenceCount--;
-    if (this->referenceCount <= 0) {
+    this->gcCount--;
+    if (this->gcCount <= 0) {
         #ifdef H_PCT_OBJECT_CALLBACKS
         Object_freeByType(this->objType, this);
         #else
@@ -575,7 +579,7 @@ void Object_print(void *_this)
 #endif
 
 
-// ./files/cstring.h 2024-08-04 01:39:14
+// ./files/cstring.h 2024-08-06 20:19:18
 
 
 // HEADER ---------------------------------------------------------------------
@@ -1054,7 +1058,7 @@ uint64_t strhash(const char *str) {
 
 
 
-// ./files/string.h 2024-08-04 01:39:14
+// ./files/string.h 2024-08-06 20:19:18
 
 // string
 
@@ -1489,7 +1493,7 @@ String *String_trim(String *this)
 #endif
 
 
-// ./files/cursor.h 2024-08-04 01:39:14
+// ./files/cursor.h 2024-08-06 20:19:18
 
 // cursor
 
@@ -1533,7 +1537,7 @@ void Cursor_free(Cursor *this)
 #endif
 
 
-// ./files/hashkey.h 2024-08-04 01:39:14
+// ./files/hashkey.h 2024-08-06 20:19:18
 
 // Hashkey
 
@@ -1578,7 +1582,7 @@ void Hashkey_free(void *_this)
 #endif
 
 
-// ./files/hashmap.h 2024-08-04 01:39:14
+// ./files/hashmap.h 2024-08-06 20:19:18
 
 // hashmap
 
@@ -1712,9 +1716,9 @@ void *Hashmap_del(Hashmap *this, char *_key) {
     return tmp;
 }
 
-typedef void (*HASHMAP_FUNC)(Hashkey *, void *);
+typedef void (*HASHMAP_FOREACH_FUNC)(Hashkey *, void *);
 
-void Hashmap_foreachHashkey(Hashmap *this, HASHMAP_FUNC func, void *arg) {
+void Hashmap_foreachItem(Hashmap *this, HASHMAP_FOREACH_FUNC func, void *arg) {
     Hashkey *ptr;
     for (int i = 0; i < HASHMAP_DEFAULT_CAPACITY; ++i) {
         ptr = this[i].position;
@@ -1733,7 +1737,7 @@ char *Hashmap_toString(Hashmap *this)
 #endif
 
 
-// ./files/foliage.h 2024-08-04 01:39:14
+// ./files/foliage.h 2024-08-06 20:19:18
 
 // token
 
@@ -1791,7 +1795,7 @@ void Foliage_free(Foliage *this)
 #endif
 
 
-// ./files/block.h 2024-08-04 01:39:14
+// ./files/block.h 2024-08-06 20:19:18
 
 // token
 
@@ -1909,7 +1913,7 @@ void Block_free(void *_this)
 #endif
 
 
-// ./files/queue.h 2024-08-04 01:39:14
+// ./files/queue.h 2024-08-06 20:19:18
 
 // queue
 
@@ -2028,7 +2032,7 @@ void *Queue_next(Queue *this, Cursor *cursor)
 #endif
 
 
-// ./files/stack.h 2024-08-04 01:39:14
+// ./files/stack.h 2024-08-06 20:19:18
 
 // stack
 
@@ -2169,10 +2173,22 @@ void Stack_reverse(Stack *this)
     Object_release(queue);
 }
 
+
+typedef void (*STACK_FOREACH_FUNC)(void *, void *);
+
+void Stack_foreachItem(Stack *this, STACK_FOREACH_FUNC func, void *arg) {
+    Cursor *cursor = Stack_reset(this);
+    void *ptr = NULL;
+    while ((ptr = Stack_next(this, cursor)) != NULL) {
+        func(ptr, arg);
+    }
+    Cursor_free(cursor);
+}
+
 #endif
 
 
-// ./files/array.h 2024-08-04 01:39:14
+// ./files/array.h 2024-08-06 20:19:18
 
 // array
 
@@ -2407,7 +2423,7 @@ char *Array_toString(Array *this)
 #endif
 
 
-// ./files/helpers.h 2024-08-04 01:39:14
+// ./files/helpers.h 2024-08-06 20:19:18
 
 // helpers
 
@@ -2446,7 +2462,7 @@ void pct_object_print(void *_this)
     if (_this == NULL) tools_error("null pointer to object print");
     Object *this = _this;
     int type = this->objType;
-    int count = this->referenceCount;
+    int count = this->gcCount;
     printf("<Object t:%c c:%i p:%p>\n", type, count, this);
 }
 
