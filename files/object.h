@@ -9,6 +9,7 @@ typedef struct _Object {
     char objType;
     int gcCount;
     char gcMark;
+    char gcFreeze;
     void* gcNext;
 } Object;
 
@@ -18,6 +19,7 @@ void Object_init(void *_this, char _objType)
     this->objType = _objType;
     this->gcCount = 1;
     this->gcMark = 0;
+    this->gcFreeze = true;
     this->gcNext = NULL;
     #ifdef H_PCT_OBJECT_CALLBACKS
     Object_initByType(this->objType, this);
