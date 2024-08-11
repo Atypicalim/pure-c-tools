@@ -4,13 +4,14 @@
 #define H_PCT_QUEUE
 
 #include "block.h" // [M[ IGNORE ]M]
+#include "cursor.h" // [M[ IGNORE ]M]
 
 typedef struct _Queue {
     struct _Object;
     int size;
     Block *head;
     Block *tail;
-    Block *cursor;
+    Cursor *cursor;
 } Queue;
 
 Queue *Queue_new()
@@ -20,7 +21,7 @@ Queue *Queue_new()
     queue->size = 0;
     queue->head = NULL;
     queue->tail = NULL;
-    queue->cursor = NULL;
+    queue->cursor = Cursor_new(NULL);
     return queue;
 }
 
@@ -97,7 +98,19 @@ void Queue_free(Queue *this)
         Object_release(head);
         head = this->head;
     }
+    Object_free(this->cursor);
     Object_free(this);
+}
+
+void Queue_RESTE(Queue *this) {
+    Cursor_set(this->cursor, this->head);
+}
+
+void *Queue_NEXT(Queue *this) {
+    Block *temp = Cursor_get(this->cursor);
+    if (temp == NULL) return NULL;
+    Cursor_set(this->cursor, temp->next);
+    return temp->data;
 }
 
 Cursor *Queue_reset(Queue *this)

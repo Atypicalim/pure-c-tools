@@ -1,5 +1,5 @@
 
-// ./files/header.h 2024-08-08 20:28:41
+// ./files/header.h 2024-08-11 15:10:00
 
 // pure c tools
 
@@ -67,7 +67,7 @@ char PCT_TAG_ERROR[] = "[ERROR]";
 #endif
 
 
-// ./files/log.h 2024-08-08 20:28:41
+// ./files/log.h 2024-08-11 15:10:00
 
 // log
 
@@ -224,7 +224,7 @@ int log_set_func(log_Func *func) {
 }
 
 
-// ./files/tools.h 2024-08-08 20:28:41
+// ./files/tools.h 2024-08-11 15:10:00
 
 // tools
 
@@ -502,7 +502,7 @@ int file_create_directory(char *path)
 #endif
 
 
-// ./files/object.h 2024-08-08 20:28:41
+// ./files/object.h 2024-08-11 15:10:00
 
 
 #ifndef H_PCT_UG_OBJECT
@@ -581,7 +581,7 @@ void Object_print(void *_this)
 #endif
 
 
-// ./files/cstring.h 2024-08-08 20:28:42
+// ./files/cstring.h 2024-08-11 15:10:00
 
 
 // HEADER ---------------------------------------------------------------------
@@ -1060,7 +1060,7 @@ uint64_t strhash(const char *str) {
 
 
 
-// ./files/string.h 2024-08-08 20:28:42
+// ./files/string.h 2024-08-11 15:10:00
 
 // string
 
@@ -1495,7 +1495,7 @@ String *String_trim(String *this)
 #endif
 
 
-// ./files/cursor.h 2024-08-08 20:28:42
+// ./files/cursor.h 2024-08-11 15:10:00
 
 // cursor
 
@@ -1504,42 +1504,42 @@ String *String_trim(String *this)
 
 typedef struct _Cursor {
     struct _Object;
-    void *cursor;
+    void *target;
 } Cursor;
 
-Cursor *Cursor_new(void *cursor)
+Cursor *Cursor_new(void *target)
 {
-    Cursor *queue = (Cursor *)pct_mallloc(sizeof(Cursor));
-    Object_init(queue, PCT_OBJ_CURSOR);
-    queue->cursor = cursor;
-    return queue;
+    Cursor *cursor = (Cursor *)pct_mallloc(sizeof(Cursor));
+    Object_init(cursor, PCT_OBJ_CURSOR);
+    cursor->target = target;
+    return cursor;
 }
 
-void Cursor_set(Cursor *this, void *cursor)
+void Cursor_set(Cursor *this, void *target)
 {
-    this->cursor = cursor;
+    this->target = target;
 }
 
 void *Cursor_get(Cursor *this)
 {
-    return this->cursor;
+    return this->target;
 }
 
 void Cursor_print(Cursor *this)
 {
-    printf("[(CURSOR) => p:%s, c:%s]\n", this, this->cursor);
+    printf("[(CURSOR) => p:%s, t:%s]\n", this, this->target);
 }
 
 void Cursor_free(Cursor *this)
 {
-    this->cursor = NULL;
+    this->target = NULL;
     Object_free(this);
 }
 
 #endif
 
 
-// ./files/hashkey.h 2024-08-08 20:28:42
+// ./files/hashkey.h 2024-08-11 15:10:00
 
 // Hashkey
 
@@ -1584,7 +1584,7 @@ void Hashkey_free(void *_this)
 #endif
 
 
-// ./files/hashmap.h 2024-08-08 20:28:42
+// ./files/hashmap.h 2024-08-11 15:10:00
 
 // hashmap
 
@@ -1739,7 +1739,7 @@ char *Hashmap_toString(Hashmap *this)
 #endif
 
 
-// ./files/foliage.h 2024-08-08 20:28:42
+// ./files/foliage.h 2024-08-11 15:10:00
 
 // token
 
@@ -1797,7 +1797,7 @@ void Foliage_free(Foliage *this)
 #endif
 
 
-// ./files/block.h 2024-08-08 20:28:42
+// ./files/block.h 2024-08-11 15:10:00
 
 // token
 
@@ -1915,7 +1915,7 @@ void Block_free(void *_this)
 #endif
 
 
-// ./files/queue.h 2024-08-08 20:28:42
+// ./files/queue.h 2024-08-11 15:10:00
 
 // queue
 
@@ -1928,7 +1928,7 @@ typedef struct _Queue {
     int size;
     Block *head;
     Block *tail;
-    Block *cursor;
+    Cursor *cursor;
 } Queue;
 
 Queue *Queue_new()
@@ -1938,7 +1938,7 @@ Queue *Queue_new()
     queue->size = 0;
     queue->head = NULL;
     queue->tail = NULL;
-    queue->cursor = NULL;
+    queue->cursor = Cursor_new(NULL);
     return queue;
 }
 
@@ -2015,7 +2015,19 @@ void Queue_free(Queue *this)
         Object_release(head);
         head = this->head;
     }
+    Object_free(this->cursor);
     Object_free(this);
+}
+
+void Queue_RESTE(Queue *this) {
+    Cursor_set(this->cursor, this->head);
+}
+
+void *Queue_NEXT(Queue *this) {
+    Block *temp = Cursor_get(this->cursor);
+    if (temp == NULL) return NULL;
+    Cursor_set(this->cursor, temp->next);
+    return temp->data;
 }
 
 Cursor *Queue_reset(Queue *this)
@@ -2034,7 +2046,7 @@ void *Queue_next(Queue *this, Cursor *cursor)
 #endif
 
 
-// ./files/stack.h 2024-08-08 20:28:42
+// ./files/stack.h 2024-08-11 15:10:00
 
 // stack
 
@@ -2047,7 +2059,7 @@ typedef struct _Stack {
     int size;
     Block *head;
     Block *tail;
-    Block *cursor;
+    Cursor *cursor;
 } Stack;
 
 Stack *Stack_new()
@@ -2057,7 +2069,7 @@ Stack *Stack_new()
     stack->size = 0;
     stack->head = NULL;
     stack->tail = NULL;
-    stack->cursor = NULL;
+    stack->cursor = Cursor_new(NULL);;
     return stack;
 }
 
@@ -2134,7 +2146,19 @@ void Stack_free(Stack *this)
         Object_release(tail);
         tail = this->tail;
     }
+    Object_free(this->cursor);
     Object_free(this);
+}
+
+void Stack_RESTE(Stack *this) {
+    Cursor_set(this->cursor, this->tail);
+}
+
+void *Stack_NEXT(Stack *this) {
+    Block *temp = Cursor_get(this->cursor);
+    if (temp == NULL) return NULL;
+    Cursor_set(this->cursor, temp->last);
+    return temp->data;
 }
 
 Cursor *Stack_reset(Stack *this)
@@ -2190,7 +2214,7 @@ void Stack_foreachItem(Stack *this, STACK_FOREACH_FUNC func, void *arg) {
 #endif
 
 
-// ./files/array.h 2024-08-08 20:28:42
+// ./files/array.h 2024-08-11 15:10:00
 
 // array
 
@@ -2425,7 +2449,7 @@ char *Array_toString(Array *this)
 #endif
 
 
-// ./files/helpers.h 2024-08-08 20:28:42
+// ./files/helpers.h 2024-08-11 15:10:00
 
 // helpers
 

@@ -4,13 +4,14 @@
 #define H_PCT_STACK
 
 #include "block.h" // [M[ IGNORE ]M]
+#include "cursor.h" // [M[ IGNORE ]M]
 
 typedef struct _Stack {
     struct _Object;
     int size;
     Block *head;
     Block *tail;
-    Block *cursor;
+    Cursor *cursor;
 } Stack;
 
 Stack *Stack_new()
@@ -20,7 +21,7 @@ Stack *Stack_new()
     stack->size = 0;
     stack->head = NULL;
     stack->tail = NULL;
-    stack->cursor = NULL;
+    stack->cursor = Cursor_new(NULL);;
     return stack;
 }
 
@@ -97,7 +98,19 @@ void Stack_free(Stack *this)
         Object_release(tail);
         tail = this->tail;
     }
+    Object_free(this->cursor);
     Object_free(this);
+}
+
+void Stack_RESTE(Stack *this) {
+    Cursor_set(this->cursor, this->tail);
+}
+
+void *Stack_NEXT(Stack *this) {
+    Block *temp = Cursor_get(this->cursor);
+    if (temp == NULL) return NULL;
+    Cursor_set(this->cursor, temp->last);
+    return temp->data;
 }
 
 Cursor *Stack_reset(Stack *this)
