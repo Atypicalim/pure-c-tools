@@ -76,7 +76,7 @@ void *Hashmap_setByCheck(Hashmap *this, char *_key, void *value, HASHMAP_SET_FUN
         }
         ptr = ptr->next;
     }
-    if (!rpl) {
+    if (rpl != NULL) {
         Object_release(key);
         return rpl;
     }
