@@ -3,6 +3,9 @@
 #ifndef H_PCT_HASHMAP
 #define H_PCT_HASHMAP
 
+#include "header.h"  // [M[ IGNORE ]M]
+#include "hashkey.h" // [M[ IGNORE ]M]
+
 #define HASHMAP_DEFAULT_CAPACITY 4096
 
 typedef struct _Hashmap {
@@ -91,12 +94,12 @@ void *Hashmap_setByCheck(Hashmap *this, char *_key, void *value, HASHMAP_SET_FUN
     return NULL;
 }
 
-bool _hashmap_set_check_default(void *old, void *new) {
+bool _hashmap_set_by_default(void *_old, void *_new) {
     return true;
 }
 
 void *Hashmap_set(Hashmap *this, char *_key, void *value) {
-    return Hashmap_setByCheck(this, _key, value, _hashmap_set_check_default);
+    return Hashmap_setByCheck(this, _key, value, _hashmap_set_by_default);
 }
 
 void *Hashmap_get(Hashmap *this, char *_key) {
@@ -163,6 +166,18 @@ void Hashmap_foreachItem(Hashmap *this, HASHMAP_FOREACH_FUNC func, void *arg) {
             ptr = ptr->next;
         }
     }
+}
+
+void _hashmap_copy_to_other(Hashkey *hashkey, void *other) {
+    String *key = hashkey->key;
+    void *val = hashkey->value;
+    char *_key = String_get(key);
+    Hashmap_set(other, _key, val);
+}
+
+void Hashmap_copyTo(Hashmap *this, Hashmap *other)
+{
+    Hashmap_foreachItem(this, _hashmap_copy_to_other, other);
 }
 
 char *Hashmap_toString(Hashmap *this)

@@ -1,5 +1,5 @@
 
-// ./files/header.h 2024-08-23 00:12:35
+// ./files/header.h 2024-08-23 00:32:33
 
 // pure c tools
 
@@ -67,7 +67,7 @@ char PCT_TAG_ERROR[] = "[ERROR]";
 #endif
 
 
-// ./files/log.h 2024-08-23 00:12:35
+// ./files/log.h 2024-08-23 00:32:33
 
 // log
 
@@ -224,7 +224,7 @@ int log_set_func(log_Func *func) {
 }
 
 
-// ./files/tools.h 2024-08-23 00:12:35
+// ./files/tools.h 2024-08-23 00:32:33
 
 // tools
 
@@ -502,7 +502,7 @@ int file_create_directory(char *path)
 #endif
 
 
-// ./files/object.h 2024-08-23 00:12:35
+// ./files/object.h 2024-08-23 00:32:33
 
 
 #ifndef H_PCT_UG_OBJECT
@@ -581,7 +581,7 @@ void Object_print(void *_this)
 #endif
 
 
-// ./files/cstring.h 2024-08-23 00:12:35
+// ./files/cstring.h 2024-08-23 00:32:33
 
 
 // HEADER ---------------------------------------------------------------------
@@ -1060,7 +1060,7 @@ uint64_t strhash(const char *str) {
 
 
 
-// ./files/string.h 2024-08-23 00:12:35
+// ./files/string.h 2024-08-23 00:32:33
 
 // string
 
@@ -1495,7 +1495,7 @@ String *String_trim(String *this)
 #endif
 
 
-// ./files/cursor.h 2024-08-23 00:12:35
+// ./files/cursor.h 2024-08-23 00:32:33
 
 // cursor
 
@@ -1539,7 +1539,7 @@ void Cursor_free(Cursor *this)
 #endif
 
 
-// ./files/hashkey.h 2024-08-23 00:12:35
+// ./files/hashkey.h 2024-08-23 00:32:33
 
 // Hashkey
 
@@ -1584,12 +1584,13 @@ void Hashkey_free(void *_this)
 #endif
 
 
-// ./files/hashmap.h 2024-08-23 00:12:35
+// ./files/hashmap.h 2024-08-23 00:32:33
 
 // hashmap
 
 #ifndef H_PCT_HASHMAP
 #define H_PCT_HASHMAP
+
 
 #define HASHMAP_DEFAULT_CAPACITY 4096
 
@@ -1679,12 +1680,12 @@ void *Hashmap_setByCheck(Hashmap *this, char *_key, void *value, HASHMAP_SET_FUN
     return NULL;
 }
 
-bool _hashmap_set_check_default(void *old, void *new) {
+bool _hashmap_set_by_default(void *_old, void *_new) {
     return true;
 }
 
 void *Hashmap_set(Hashmap *this, char *_key, void *value) {
-    return Hashmap_setByCheck(this, _key, value, _hashmap_set_check_default);
+    return Hashmap_setByCheck(this, _key, value, _hashmap_set_by_default);
 }
 
 void *Hashmap_get(Hashmap *this, char *_key) {
@@ -1753,6 +1754,18 @@ void Hashmap_foreachItem(Hashmap *this, HASHMAP_FOREACH_FUNC func, void *arg) {
     }
 }
 
+void _hashmap_copy_to_other(Hashkey *hashkey, void *other) {
+    String *key = hashkey->key;
+    void *val = hashkey->value;
+    char *_key = String_get(key);
+    Hashmap_set(other, _key, val);
+}
+
+void Hashmap_copyTo(Hashmap *this, Hashmap *other)
+{
+    Hashmap_foreachItem(this, _hashmap_copy_to_other, other);
+}
+
 char *Hashmap_toString(Hashmap *this)
 {
     return tools_format("[Hashmap => p:%p s:%i]", this, this->size);
@@ -1761,7 +1774,7 @@ char *Hashmap_toString(Hashmap *this)
 #endif
 
 
-// ./files/foliage.h 2024-08-23 00:12:35
+// ./files/foliage.h 2024-08-23 00:32:33
 
 // token
 
@@ -1819,7 +1832,7 @@ void Foliage_free(Foliage *this)
 #endif
 
 
-// ./files/block.h 2024-08-23 00:12:35
+// ./files/block.h 2024-08-23 00:32:33
 
 // token
 
@@ -1937,7 +1950,7 @@ void Block_free(void *_this)
 #endif
 
 
-// ./files/queue.h 2024-08-23 00:12:35
+// ./files/queue.h 2024-08-23 00:32:33
 
 // queue
 
@@ -2068,7 +2081,7 @@ void *Queue_next(Queue *this, Cursor *cursor)
 #endif
 
 
-// ./files/stack.h 2024-08-23 00:12:35
+// ./files/stack.h 2024-08-23 00:32:33
 
 // stack
 
@@ -2236,7 +2249,7 @@ void Stack_foreachItem(Stack *this, STACK_FOREACH_FUNC func, void *arg) {
 #endif
 
 
-// ./files/array.h 2024-08-23 00:12:35
+// ./files/array.h 2024-08-23 00:32:33
 
 // array
 
@@ -2483,7 +2496,7 @@ char *Array_toString(Array *this)
 #endif
 
 
-// ./files/helpers.h 2024-08-23 00:12:35
+// ./files/helpers.h 2024-08-23 00:32:33
 
 // helpers
 
@@ -2505,15 +2518,15 @@ void pct_object_free(void *_this)
     Object *this = _this;
     int type = this->objType;
     if (type == PCT_OBJ_OBJECT) return Object_free(this);
-    if (type == PCT_OBJ_STRING) return String_free(this);
-    if (type == PCT_OBJ_ARRAY) return Array_free(this);
-    if (type == PCT_OBJ_CURSOR) return Cursor_free(this);
-    if (type == PCT_OBJ_STACK) return Stack_free(this);
-    if (type == PCT_OBJ_QUEUE) return Queue_free(this);
-    if (type == PCT_OBJ_HASHKEY) return Hashkey_free(this);
-    if (type == PCT_OBJ_HASHMAP) return Hashmap_free(this);
-    if (type == PCT_OBJ_FOLIAGE) return Foliage_free(this);
-    if (type == PCT_OBJ_BLOCK) return Block_free(this);
+    if (type == PCT_OBJ_STRING) return String_free((String *)this);
+    if (type == PCT_OBJ_ARRAY) return Array_free((Array *)this);
+    if (type == PCT_OBJ_CURSOR) return Cursor_free((Cursor *)this);
+    if (type == PCT_OBJ_STACK) return Stack_free((Stack *)this);
+    if (type == PCT_OBJ_QUEUE) return Queue_free((Queue *)this);
+    if (type == PCT_OBJ_HASHKEY) return Hashkey_free((Hashkey *)this);
+    if (type == PCT_OBJ_HASHMAP) return Hashmap_free((Hashmap *)this);
+    if (type == PCT_OBJ_FOLIAGE) return Foliage_free((Foliage *)this);
+    if (type == PCT_OBJ_BLOCK) return Block_free((Block *)this);
     Object_free(this);
 }
 
