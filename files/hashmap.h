@@ -40,41 +40,63 @@ void Hashmap_free(Hashmap *this) {
     Object_free(this);
 }
 
-void *Hashmap_set(Hashmap *this, char *_key, void *value) {
+typedef bool (*HASHMAP_SET_FUNC)(void *, void *);
+
+void *Hashmap_setByCheck(Hashmap *this, char *_key, void *value, HASHMAP_SET_FUNC func) {
     assert(this != NULL);
     assert(_key != NULL);
     assert(value != NULL);
     String *key = String_format(_key);
     int pos = String_hash(key) % this->size;
-    if (this->retain) {
-        Object_retain(value);
-    }
-    //
-    void *tmp = NULL;
+    // new position
     Hashkey *ptr = this->bucket[pos];
     if (ptr == NULL) {
-        this->bucket[pos] = Hashkey_new(key, value);
+        if (func(NULL, value)) {
+            this->bucket[pos] = Hashkey_new(key, value);
+            if (this->retain) Object_retain(value);
+        }
         Object_release(key);
         return NULL;
     }
+    // replace old
+    void *tmp = NULL;
+    void *rpl = NULL;
     while (ptr != NULL) {
         if (String_equal(key, ptr->key)) {
             tmp = ptr->value;
-            if (this->retain) {
-                Object_release(ptr->value);
+            if (func(tmp, value)) {
+                rpl = tmp;
+                Hashkey_set(ptr, value);
+                if (this->retain) {
+                    Object_retain(value);
+                    Object_release(rpl);
+                }
             }
-            Hashkey_set(ptr, value);
-            Object_release(key);
-            // TODO: release tmp
-            return tmp;
+            break;
         }
         ptr = ptr->next;
     }
-    Hashkey *pnode = Hashkey_new(key, value);
+    if (!rpl) {
+        Object_release(key);
+        return rpl;
+    }
+    // prepend position
+    if (func(NULL, value)) {
+        Hashkey *pnode = Hashkey_new(key, value);
+        pnode->next = this->bucket[pos];
+        this->bucket[pos] = pnode;
+        if (this->retain) Object_retain(value);
+    }
     Object_release(key);
-    pnode->next = this->bucket[pos];
-    this->bucket[pos] = pnode;
     return NULL;
+}
+
+bool _hashmap_set_check_default(void *old, void *new) {
+    return true;
+}
+
+void *Hashmap_set(Hashmap *this, char *_key, void *value) {
+    return Hashmap_setByCheck(this, _key, value, _hashmap_set_check_default);
 }
 
 void *Hashmap_get(Hashmap *this, char *_key) {

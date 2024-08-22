@@ -13,14 +13,16 @@ typedef struct _Array {
     struct _Object;
     void **elements;
     int length;
+    bool retain;
     int capacity;
     bool nullable;
 } Array;
 
-Array *Array_new()
+Array *Array_new(bool isRetainValue)
 {
     Array *array = (Array *)pct_mallloc(sizeof(Array));
     Object_init(array, PCT_OBJ_ARRAY);
+    array->retain = isRetainValue;
     array->capacity = ARRAY_DEFAULT_CAPACITY;
     array->length = 0;
     array->nullable = false;
@@ -32,7 +34,9 @@ Array *Array_new()
 void Array_clear(Array *this)
 {
     for (int i = 0; i < this->length; i++) {
-        Object_release(this->elements[i]);
+        if (this->retain) {
+            Object_release(this->elements[i]);
+        }
         this->elements[i] = NULL;
     }
     this->length = 0;
@@ -67,9 +71,13 @@ bool Array_set(Array *this, int index, void *element)
     bool isOk = _array_check_resize(this, length);
     if (!isOk) return false;
     if (this->elements[index] != NULL) {
-        Object_release(this->elements[index]);
+        if (this->retain) {
+            Object_release(this->elements[index]);
+        }
     }
-    Object_retain(element);
+    if (this->retain) {
+        Object_retain(element);
+    }
     this->length = length;
     this->elements[index] = element;
     return true;
@@ -101,7 +109,9 @@ void *Array_del(Array *this, int index)
     }
     this->elements[this->length] = NULL;
     this->length = this->length - 1;
-    Object_release(item);
+    if (this->retain) {
+        Object_release(item);
+    }
     return item;
 }
 
@@ -126,7 +136,9 @@ bool _array_insert(Array *this, int index, void *element, bool isBefore)
         index = this->length - 1;
         isBefore = false;
     }
-    Object_retain(element);
+    if (this->retain) {
+        Object_retain(element);
+    }
     // 
     if (this->length == 0)
     {
@@ -217,7 +229,7 @@ int Array_find(Array *this, int from, int to, bool isReverse, ArrayFindFunction 
 
 Array *Array_slice(Array *this, int from, int to)
 {
-    Array *other = Array_new();
+    Array *other = Array_new(this->retain);
     if (from < 0 || to > this->length || from >= to) return other;
     for (int i = from; i < to; i++) Array_append(other, Array_get(this, i));
     return other;

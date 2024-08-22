@@ -1,5 +1,5 @@
 
-// ./files/header.h 2024-08-15 13:00:31
+// ./files/header.h 2024-08-22 23:09:08
 
 // pure c tools
 
@@ -67,7 +67,7 @@ char PCT_TAG_ERROR[] = "[ERROR]";
 #endif
 
 
-// ./files/log.h 2024-08-15 13:00:31
+// ./files/log.h 2024-08-22 23:09:08
 
 // log
 
@@ -224,7 +224,7 @@ int log_set_func(log_Func *func) {
 }
 
 
-// ./files/tools.h 2024-08-15 13:00:31
+// ./files/tools.h 2024-08-22 23:09:08
 
 // tools
 
@@ -502,7 +502,7 @@ int file_create_directory(char *path)
 #endif
 
 
-// ./files/object.h 2024-08-15 13:00:31
+// ./files/object.h 2024-08-22 23:09:08
 
 
 #ifndef H_PCT_UG_OBJECT
@@ -581,7 +581,7 @@ void Object_print(void *_this)
 #endif
 
 
-// ./files/cstring.h 2024-08-15 13:00:31
+// ./files/cstring.h 2024-08-22 23:09:08
 
 
 // HEADER ---------------------------------------------------------------------
@@ -1060,7 +1060,7 @@ uint64_t strhash(const char *str) {
 
 
 
-// ./files/string.h 2024-08-15 13:00:31
+// ./files/string.h 2024-08-22 23:09:08
 
 // string
 
@@ -1495,7 +1495,7 @@ String *String_trim(String *this)
 #endif
 
 
-// ./files/cursor.h 2024-08-15 13:00:31
+// ./files/cursor.h 2024-08-22 23:09:08
 
 // cursor
 
@@ -1539,7 +1539,7 @@ void Cursor_free(Cursor *this)
 #endif
 
 
-// ./files/hashkey.h 2024-08-15 13:00:31
+// ./files/hashkey.h 2024-08-22 23:09:08
 
 // Hashkey
 
@@ -1584,7 +1584,7 @@ void Hashkey_free(void *_this)
 #endif
 
 
-// ./files/hashmap.h 2024-08-15 13:00:31
+// ./files/hashmap.h 2024-08-22 23:09:08
 
 // hashmap
 
@@ -1628,41 +1628,63 @@ void Hashmap_free(Hashmap *this) {
     Object_free(this);
 }
 
-void *Hashmap_set(Hashmap *this, char *_key, void *value) {
+typedef bool (*HASHMAP_SET_FUNC)(void *, void *);
+
+void *Hashmap_setByCheck(Hashmap *this, char *_key, void *value, HASHMAP_SET_FUNC func) {
     assert(this != NULL);
     assert(_key != NULL);
     assert(value != NULL);
     String *key = String_format(_key);
     int pos = String_hash(key) % this->size;
-    if (this->retain) {
-        Object_retain(value);
-    }
-    //
-    void *tmp = NULL;
+    // new position
     Hashkey *ptr = this->bucket[pos];
     if (ptr == NULL) {
-        this->bucket[pos] = Hashkey_new(key, value);
+        if (func(NULL, value)) {
+            this->bucket[pos] = Hashkey_new(key, value);
+            if (this->retain) Object_retain(value);
+        }
         Object_release(key);
         return NULL;
     }
+    // replace old
+    void *tmp = NULL;
+    void *rpl = NULL;
     while (ptr != NULL) {
         if (String_equal(key, ptr->key)) {
             tmp = ptr->value;
-            if (this->retain) {
-                Object_release(ptr->value);
+            if (func(tmp, value)) {
+                rpl = tmp;
+                Hashkey_set(ptr, value);
+                if (this->retain) {
+                    Object_retain(value);
+                    Object_release(rpl);
+                }
             }
-            Hashkey_set(ptr, value);
-            Object_release(key);
-            // TODO: release tmp
-            return tmp;
+            break;
         }
         ptr = ptr->next;
     }
-    Hashkey *pnode = Hashkey_new(key, value);
+    if (!rpl) {
+        Object_release(key);
+        return rpl;
+    }
+    // prepend position
+    if (func(NULL, value)) {
+        Hashkey *pnode = Hashkey_new(key, value);
+        pnode->next = this->bucket[pos];
+        this->bucket[pos] = pnode;
+        if (this->retain) Object_retain(value);
+    }
     Object_release(key);
-    pnode->next = this->bucket[pos];
-    this->bucket[pos] = pnode;
     return NULL;
+}
+
+bool _hashmap_set_check_default(void *old, void *new) {
+    return true;
+}
+
+void *Hashmap_set(Hashmap *this, char *_key, void *value) {
+    return Hashmap_setByCheck(this, _key, value, _hashmap_set_check_default);
 }
 
 void *Hashmap_get(Hashmap *this, char *_key) {
@@ -1739,7 +1761,7 @@ char *Hashmap_toString(Hashmap *this)
 #endif
 
 
-// ./files/foliage.h 2024-08-15 13:00:31
+// ./files/foliage.h 2024-08-22 23:09:08
 
 // token
 
@@ -1797,7 +1819,7 @@ void Foliage_free(Foliage *this)
 #endif
 
 
-// ./files/block.h 2024-08-15 13:00:31
+// ./files/block.h 2024-08-22 23:09:08
 
 // token
 
@@ -1915,7 +1937,7 @@ void Block_free(void *_this)
 #endif
 
 
-// ./files/queue.h 2024-08-15 13:00:31
+// ./files/queue.h 2024-08-22 23:09:08
 
 // queue
 
@@ -2046,7 +2068,7 @@ void *Queue_next(Queue *this, Cursor *cursor)
 #endif
 
 
-// ./files/stack.h 2024-08-15 13:00:31
+// ./files/stack.h 2024-08-22 23:09:08
 
 // stack
 
@@ -2214,7 +2236,7 @@ void Stack_foreachItem(Stack *this, STACK_FOREACH_FUNC func, void *arg) {
 #endif
 
 
-// ./files/array.h 2024-08-15 13:00:31
+// ./files/array.h 2024-08-22 23:09:08
 
 // array
 
@@ -2231,14 +2253,16 @@ typedef struct _Array {
     struct _Object;
     void **elements;
     int length;
+    bool retain;
     int capacity;
     bool nullable;
 } Array;
 
-Array *Array_new()
+Array *Array_new(bool isRetainValue)
 {
     Array *array = (Array *)pct_mallloc(sizeof(Array));
     Object_init(array, PCT_OBJ_ARRAY);
+    array->retain = isRetainValue;
     array->capacity = ARRAY_DEFAULT_CAPACITY;
     array->length = 0;
     array->nullable = false;
@@ -2250,7 +2274,9 @@ Array *Array_new()
 void Array_clear(Array *this)
 {
     for (int i = 0; i < this->length; i++) {
-        Object_release(this->elements[i]);
+        if (this->retain) {
+            Object_release(this->elements[i]);
+        }
         this->elements[i] = NULL;
     }
     this->length = 0;
@@ -2285,9 +2311,13 @@ bool Array_set(Array *this, int index, void *element)
     bool isOk = _array_check_resize(this, length);
     if (!isOk) return false;
     if (this->elements[index] != NULL) {
-        Object_release(this->elements[index]);
+        if (this->retain) {
+            Object_release(this->elements[index]);
+        }
     }
-    Object_retain(element);
+    if (this->retain) {
+        Object_retain(element);
+    }
     this->length = length;
     this->elements[index] = element;
     return true;
@@ -2319,7 +2349,9 @@ void *Array_del(Array *this, int index)
     }
     this->elements[this->length] = NULL;
     this->length = this->length - 1;
-    Object_release(item);
+    if (this->retain) {
+        Object_release(item);
+    }
     return item;
 }
 
@@ -2344,7 +2376,9 @@ bool _array_insert(Array *this, int index, void *element, bool isBefore)
         index = this->length - 1;
         isBefore = false;
     }
-    Object_retain(element);
+    if (this->retain) {
+        Object_retain(element);
+    }
     // 
     if (this->length == 0)
     {
@@ -2435,7 +2469,7 @@ int Array_find(Array *this, int from, int to, bool isReverse, ArrayFindFunction 
 
 Array *Array_slice(Array *this, int from, int to)
 {
-    Array *other = Array_new();
+    Array *other = Array_new(this->retain);
     if (from < 0 || to > this->length || from >= to) return other;
     for (int i = from; i < to; i++) Array_append(other, Array_get(this, i));
     return other;
@@ -2449,7 +2483,7 @@ char *Array_toString(Array *this)
 #endif
 
 
-// ./files/helpers.h 2024-08-15 13:00:31
+// ./files/helpers.h 2024-08-22 23:09:08
 
 // helpers
 
