@@ -1,5 +1,5 @@
 
-// ./files/header.h 2024-08-23 00:32:33
+// ./files/header.h 2024-08-24 18:17:35
 
 // pure c tools
 
@@ -67,7 +67,7 @@ char PCT_TAG_ERROR[] = "[ERROR]";
 #endif
 
 
-// ./files/log.h 2024-08-23 00:32:33
+// ./files/log.h 2024-08-24 18:17:35
 
 // log
 
@@ -224,7 +224,7 @@ int log_set_func(log_Func *func) {
 }
 
 
-// ./files/tools.h 2024-08-23 00:32:33
+// ./files/tools.h 2024-08-24 18:17:35
 
 // tools
 
@@ -502,7 +502,7 @@ int file_create_directory(char *path)
 #endif
 
 
-// ./files/object.h 2024-08-23 00:32:33
+// ./files/object.h 2024-08-24 18:17:35
 
 
 #ifndef H_PCT_UG_OBJECT
@@ -581,7 +581,7 @@ void Object_print(void *_this)
 #endif
 
 
-// ./files/cstring.h 2024-08-23 00:32:33
+// ./files/cstring.h 2024-08-24 18:17:35
 
 
 // HEADER ---------------------------------------------------------------------
@@ -1060,7 +1060,7 @@ uint64_t strhash(const char *str) {
 
 
 
-// ./files/string.h 2024-08-23 00:32:33
+// ./files/string.h 2024-08-24 18:17:35
 
 // string
 
@@ -1495,7 +1495,7 @@ String *String_trim(String *this)
 #endif
 
 
-// ./files/cursor.h 2024-08-23 00:32:33
+// ./files/cursor.h 2024-08-24 18:17:35
 
 // cursor
 
@@ -1539,7 +1539,7 @@ void Cursor_free(Cursor *this)
 #endif
 
 
-// ./files/hashkey.h 2024-08-23 00:32:33
+// ./files/hashkey.h 2024-08-24 18:17:35
 
 // Hashkey
 
@@ -1584,7 +1584,7 @@ void Hashkey_free(void *_this)
 #endif
 
 
-// ./files/hashmap.h 2024-08-23 00:32:33
+// ./files/hashmap.h 2024-08-24 18:17:35
 
 // hashmap
 
@@ -1754,7 +1754,7 @@ void Hashmap_foreachItem(Hashmap *this, HASHMAP_FOREACH_FUNC func, void *arg) {
     }
 }
 
-void _hashmap_copy_to_other(Hashkey *hashkey, void *other) {
+void _hashmap_copy_to_other(Hashkey *hashkey, Hashmap *other) {
     String *key = hashkey->key;
     void *val = hashkey->value;
     char *_key = String_get(key);
@@ -1774,7 +1774,7 @@ char *Hashmap_toString(Hashmap *this)
 #endif
 
 
-// ./files/foliage.h 2024-08-23 00:32:33
+// ./files/foliage.h 2024-08-24 18:17:35
 
 // token
 
@@ -1832,7 +1832,7 @@ void Foliage_free(Foliage *this)
 #endif
 
 
-// ./files/block.h 2024-08-23 00:32:33
+// ./files/block.h 2024-08-24 18:17:35
 
 // token
 
@@ -1950,7 +1950,7 @@ void Block_free(void *_this)
 #endif
 
 
-// ./files/queue.h 2024-08-23 00:32:33
+// ./files/queue.h 2024-08-24 18:17:35
 
 // queue
 
@@ -2081,7 +2081,7 @@ void *Queue_next(Queue *this, Cursor *cursor)
 #endif
 
 
-// ./files/stack.h 2024-08-23 00:32:33
+// ./files/stack.h 2024-08-24 18:17:35
 
 // stack
 
@@ -2249,7 +2249,7 @@ void Stack_foreachItem(Stack *this, STACK_FOREACH_FUNC func, void *arg) {
 #endif
 
 
-// ./files/array.h 2024-08-23 00:32:33
+// ./files/array.h 2024-08-24 18:17:35
 
 // array
 
@@ -2488,6 +2488,24 @@ Array *Array_slice(Array *this, int from, int to)
     return other;
 }
 
+typedef void (*ARRAY_FOREACH_FUNC)(int, void *, void *);
+
+void Array_foreachItem(Array *this, ARRAY_FOREACH_FUNC func, void *arg) {
+    for (int i = 0; i < this->length; i++) {
+        void *ptr = Array_get(this, i);
+        func(i, ptr, arg);
+    }
+}
+
+void _array_copy_to_other(int i, void *item, Array *other) {
+    Hashmap_set(other, i, item);
+}
+
+void Array_copyTo(Array *this, Array *other)
+{
+    Array_foreachItem(this, _array_copy_to_other, other);
+}
+
 char *Array_toString(Array *this)
 {
     return tools_format("<Array p:%p s:%i>", this, this->length);
@@ -2496,7 +2514,7 @@ char *Array_toString(Array *this)
 #endif
 
 
-// ./files/helpers.h 2024-08-23 00:32:33
+// ./files/helpers.h 2024-08-24 18:17:35
 
 // helpers
 

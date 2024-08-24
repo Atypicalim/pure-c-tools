@@ -235,6 +235,24 @@ Array *Array_slice(Array *this, int from, int to)
     return other;
 }
 
+typedef void (*ARRAY_FOREACH_FUNC)(int, void *, void *);
+
+void Array_foreachItem(Array *this, ARRAY_FOREACH_FUNC func, void *arg) {
+    for (int i = 0; i < this->length; i++) {
+        void *ptr = Array_get(this, i);
+        func(i, ptr, arg);
+    }
+}
+
+void _array_copy_to_other(int i, void *item, Array *other) {
+    Hashmap_set(other, i, item);
+}
+
+void Array_copyTo(Array *this, Array *other)
+{
+    Array_foreachItem(this, _array_copy_to_other, other);
+}
+
 char *Array_toString(Array *this)
 {
     return tools_format("<Array p:%p s:%i>", this, this->length);

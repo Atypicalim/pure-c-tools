@@ -168,7 +168,7 @@ void Hashmap_foreachItem(Hashmap *this, HASHMAP_FOREACH_FUNC func, void *arg) {
     }
 }
 
-void _hashmap_copy_to_other(Hashkey *hashkey, void *other) {
+void _hashmap_copy_to_other(Hashkey *hashkey, Hashmap *other) {
     String *key = hashkey->key;
     void *val = hashkey->value;
     char *_key = String_get(key);
