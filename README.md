@@ -33,4 +33,5 @@ Object_print(str);
 * ...
 
 ### 3. More
-for more information please visit [github](https://github.com/kompasim/pure-c-tools).
+* ...
+  
