@@ -1,5 +1,5 @@
 
-// ./files/header.h 2024-08-24 18:23:43
+// ./files/header.h 2024-10-07 17:53:46
 
 // pure c tools
 
@@ -67,7 +67,7 @@ char PCT_TAG_ERROR[] = "[ERROR]";
 #endif
 
 
-// ./files/log.h 2024-08-24 18:23:43
+// ./files/log.h 2024-10-07 17:53:46
 
 // log
 
@@ -224,7 +224,7 @@ int log_set_func(log_Func *func) {
 }
 
 
-// ./files/tools.h 2024-08-24 18:23:43
+// ./files/tools.h 2024-10-07 17:53:46
 
 // tools
 
@@ -502,7 +502,7 @@ int file_create_directory(char *path)
 #endif
 
 
-// ./files/object.h 2024-08-24 18:23:43
+// ./files/object.h 2024-10-07 17:53:46
 
 
 #ifndef H_PCT_UG_OBJECT
@@ -581,7 +581,7 @@ void Object_print(void *_this)
 #endif
 
 
-// ./files/cstring.h 2024-08-24 18:23:43
+// ./files/cstring.h 2024-10-07 17:53:46
 
 
 // HEADER ---------------------------------------------------------------------
@@ -1060,7 +1060,7 @@ uint64_t strhash(const char *str) {
 
 
 
-// ./files/string.h 2024-08-24 18:23:43
+// ./files/string.h 2024-10-07 17:53:46
 
 // string
 
@@ -1495,7 +1495,7 @@ String *String_trim(String *this)
 #endif
 
 
-// ./files/cursor.h 2024-08-24 18:23:43
+// ./files/cursor.h 2024-10-07 17:53:46
 
 // cursor
 
@@ -1539,7 +1539,7 @@ void Cursor_free(Cursor *this)
 #endif
 
 
-// ./files/hashkey.h 2024-08-24 18:23:43
+// ./files/hashkey.h 2024-10-07 17:53:46
 
 // Hashkey
 
@@ -1584,7 +1584,7 @@ void Hashkey_free(void *_this)
 #endif
 
 
-// ./files/hashmap.h 2024-08-24 18:23:43
+// ./files/hashmap.h 2024-10-07 17:53:46
 
 // hashmap
 
@@ -1610,9 +1610,8 @@ Hashmap* Hashmap_new(bool isRetainValue) {
     return map;
 }
 
-// TODO: release removed value
-void Hashmap_free(Hashmap *this) {
-    assert(this != NULL);
+
+void Hashmap_clear(Hashmap *this) {
     Hashkey *ptr;
     Hashkey *tmp;
     for (int i = 0; i < this->size; ++i) {
@@ -1625,7 +1624,14 @@ void Hashmap_free(Hashmap *this) {
             }
             Object_release(tmp);
         }
+        this->bucket[i] = NULL;
     }
+}
+
+// TODO: release removed value
+void Hashmap_free(Hashmap *this) {
+    assert(this != NULL);
+    Hashmap_clear(this);
     Object_free(this);
 }
 
@@ -1774,7 +1780,7 @@ char *Hashmap_toString(Hashmap *this)
 #endif
 
 
-// ./files/foliage.h 2024-08-24 18:23:43
+// ./files/foliage.h 2024-10-07 17:53:46
 
 // token
 
@@ -1832,7 +1838,7 @@ void Foliage_free(Foliage *this)
 #endif
 
 
-// ./files/block.h 2024-08-24 18:23:43
+// ./files/block.h 2024-10-07 17:53:46
 
 // token
 
@@ -1950,7 +1956,7 @@ void Block_free(void *_this)
 #endif
 
 
-// ./files/queue.h 2024-08-24 18:23:43
+// ./files/queue.h 2024-10-07 17:53:46
 
 // queue
 
@@ -2081,7 +2087,7 @@ void *Queue_next(Queue *this, Cursor *cursor)
 #endif
 
 
-// ./files/stack.h 2024-08-24 18:23:43
+// ./files/stack.h 2024-10-07 17:53:46
 
 // stack
 
@@ -2249,7 +2255,7 @@ void Stack_foreachItem(Stack *this, STACK_FOREACH_FUNC func, void *arg) {
 #endif
 
 
-// ./files/array.h 2024-08-24 18:23:43
+// ./files/array.h 2024-10-07 17:53:46
 
 // array
 
@@ -2514,7 +2520,7 @@ char *Array_toString(Array *this)
 #endif
 
 
-// ./files/helpers.h 2024-08-24 18:23:43
+// ./files/helpers.h 2024-10-07 17:53:46
 
 // helpers
 

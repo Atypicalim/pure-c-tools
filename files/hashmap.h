@@ -24,9 +24,8 @@ Hashmap* Hashmap_new(bool isRetainValue) {
     return map;
 }
 
-// TODO: release removed value
-void Hashmap_free(Hashmap *this) {
-    assert(this != NULL);
+
+void Hashmap_clear(Hashmap *this) {
     Hashkey *ptr;
     Hashkey *tmp;
     for (int i = 0; i < this->size; ++i) {
@@ -39,7 +38,14 @@ void Hashmap_free(Hashmap *this) {
             }
             Object_release(tmp);
         }
+        this->bucket[i] = NULL;
     }
+}
+
+// TODO: release removed value
+void Hashmap_free(Hashmap *this) {
+    assert(this != NULL);
+    Hashmap_clear(this);
     Object_free(this);
 }
 
