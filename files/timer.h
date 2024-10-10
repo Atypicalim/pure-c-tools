@@ -4,6 +4,7 @@
 #include <stdarg.h>
 #include <stdbool.h>
 #include <time.h>
+#include <sys/time.h>
 
 // #define PCT_TIMER_DEBUG
 

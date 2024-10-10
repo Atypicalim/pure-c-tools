@@ -244,7 +244,7 @@ void Array_foreachItem(Array *this, ARRAY_FOREACH_FUNC func, void *arg) {
     }
 }
 
-void _array_copy_to_other(int i, void *item, Array *other) {
+void _array_copy_to_other(int i, void *item, void *other) {
     Array_set(other, i, item);
 }
 
