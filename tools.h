@@ -1,5 +1,5 @@
 
-// ./files/header.h 2024-10-07 17:53:46
+// ./files/header.h 2024-10-10 20:32:29
 
 // pure c tools
 
@@ -34,6 +34,7 @@
 #define PCT_OBJ_HASHMAP 'H'
 #define PCT_OBJ_FOLIAGE 'F'
 #define PCT_OBJ_BLOCK 'B'
+#define PCT_OBJ_TIMER 'T'
 
 void *pct_mallloc(size_t size)
 {
@@ -67,7 +68,7 @@ char PCT_TAG_ERROR[] = "[ERROR]";
 #endif
 
 
-// ./files/log.h 2024-10-07 17:53:46
+// ./files/log.h 2024-10-10 20:32:29
 
 // log
 
@@ -224,7 +225,7 @@ int log_set_func(log_Func *func) {
 }
 
 
-// ./files/tools.h 2024-10-07 17:53:46
+// ./files/tools.h 2024-10-10 20:32:29
 
 // tools
 
@@ -502,7 +503,7 @@ int file_create_directory(char *path)
 #endif
 
 
-// ./files/object.h 2024-10-07 17:53:46
+// ./files/object.h 2024-10-10 20:32:29
 
 
 #ifndef H_PCT_UG_OBJECT
@@ -581,7 +582,7 @@ void Object_print(void *_this)
 #endif
 
 
-// ./files/cstring.h 2024-10-07 17:53:46
+// ./files/cstring.h 2024-10-10 20:32:29
 
 
 // HEADER ---------------------------------------------------------------------
@@ -1060,7 +1061,7 @@ uint64_t strhash(const char *str) {
 
 
 
-// ./files/string.h 2024-10-07 17:53:46
+// ./files/string.h 2024-10-10 20:32:29
 
 // string
 
@@ -1495,7 +1496,7 @@ String *String_trim(String *this)
 #endif
 
 
-// ./files/cursor.h 2024-10-07 17:53:46
+// ./files/cursor.h 2024-10-10 20:32:29
 
 // cursor
 
@@ -1539,7 +1540,7 @@ void Cursor_free(Cursor *this)
 #endif
 
 
-// ./files/hashkey.h 2024-10-07 17:53:46
+// ./files/hashkey.h 2024-10-10 20:32:29
 
 // Hashkey
 
@@ -1584,7 +1585,7 @@ void Hashkey_free(void *_this)
 #endif
 
 
-// ./files/hashmap.h 2024-10-07 17:53:46
+// ./files/hashmap.h 2024-10-10 20:32:29
 
 // hashmap
 
@@ -1780,7 +1781,7 @@ char *Hashmap_toString(Hashmap *this)
 #endif
 
 
-// ./files/foliage.h 2024-10-07 17:53:46
+// ./files/foliage.h 2024-10-10 20:32:29
 
 // token
 
@@ -1838,7 +1839,7 @@ void Foliage_free(Foliage *this)
 #endif
 
 
-// ./files/block.h 2024-10-07 17:53:46
+// ./files/block.h 2024-10-10 20:32:29
 
 // token
 
@@ -1956,7 +1957,7 @@ void Block_free(void *_this)
 #endif
 
 
-// ./files/queue.h 2024-10-07 17:53:46
+// ./files/queue.h 2024-10-10 20:32:29
 
 // queue
 
@@ -2087,7 +2088,7 @@ void *Queue_next(Queue *this, Cursor *cursor)
 #endif
 
 
-// ./files/stack.h 2024-10-07 17:53:46
+// ./files/stack.h 2024-10-10 20:32:29
 
 // stack
 
@@ -2255,7 +2256,7 @@ void Stack_foreachItem(Stack *this, STACK_FOREACH_FUNC func, void *arg) {
 #endif
 
 
-// ./files/array.h 2024-10-07 17:53:46
+// ./files/array.h 2024-10-10 20:32:29
 
 // array
 
@@ -2520,7 +2521,160 @@ char *Array_toString(Array *this)
 #endif
 
 
-// ./files/helpers.h 2024-10-07 17:53:46
+// ./files/timer.h 2024-10-10 20:32:29
+
+// timer
+
+#include <stdio.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <time.h>
+
+// #define PCT_TIMER_DEBUG
+
+typedef double (*TIMER_FUNC)(void *);
+
+typedef struct _Timer {
+    struct _Object;
+    double time;
+    void *data;
+    void *next;
+    TIMER_FUNC func;
+} Timer;
+
+Timer *_timer_queue_head = NULL;
+
+double _timer_time() {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return (double)(tv.tv_sec) + (double)(tv.tv_usec / 1000000.0);
+}
+
+Timer *_timer_insert(Timer *timer, double seconds) {
+    double current = _timer_time();
+    timer->time = current + seconds;
+    #ifdef PCT_TIMER_DEBUG
+    log_debug("timer_insert: %f + %f = %f  %p", current, seconds, timer->time, timer);
+    #endif
+    //
+    if (_timer_queue_head == NULL) {
+        _timer_queue_head = timer;
+    } else if (timer->time < _timer_queue_head->time) {
+        timer->next = _timer_queue_head;
+        _timer_queue_head = timer;
+    } else {
+        Timer *current = _timer_queue_head;
+        while (current->next != NULL) {
+            Timer *next = current->next;
+            if (timer->time < next->time) break;
+            current = next;
+        }
+        timer->next = current->next;
+        current->next = timer;
+    }
+    //
+    return timer;
+}
+
+bool _timer_execute() {
+    // none
+    Timer *timer = _timer_queue_head;
+    if (timer == NULL) return true;
+    // info
+    double current = _timer_time();
+    double nearest = timer->time;
+    void *data = timer->data;
+    TIMER_FUNC func = timer->func;
+    // waiting
+    if (nearest > current) return true;
+    // remove
+    Timer *next = timer->next;
+    timer->next = NULL;
+    _timer_queue_head = next;
+    // invalid
+    if (func == NULL) return true;
+    // run
+    #ifdef PCT_TIMER_DEBUG
+    log_debug("timer_execute: %f %p", timer->time, timer);
+    #endif
+    double seconds = func(data);
+    // complete
+    seconds > 0 ? _timer_insert(timer, seconds) : pct_free(timer);
+    return false;
+}
+
+bool timer_check() {
+    bool stop = false;
+    while (!stop) stop = _timer_execute();
+    bool finished = _timer_queue_head == NULL;
+    return finished;
+}
+
+Timer *timer_delay(double seconds, void *data, TIMER_FUNC func) {
+    if (seconds < 0) {
+        seconds = 0;
+    } else if (seconds == 0) {
+        seconds = 0.00001;
+    }
+    Timer *timer = (Timer *)pct_mallloc(sizeof(Timer));
+    Object_init(timer, PCT_OBJ_TIMER);
+    timer->data = data;
+    timer->func = func;
+    return _timer_insert(timer, seconds);
+}
+
+void timer_cancel(Timer *timer) {
+    if (timer == NULL) return;
+    #ifdef PCT_TIMER_DEBUG
+    log_debug("timer_cancel: %f %p", timer->time, timer);
+    #endif
+    timer->data = NULL;
+    timer->func = NULL;
+}
+
+bool timer_loop() {
+    #ifdef PCT_TIMER_DEBUG
+    log_debug("timer_loop:");
+    #endif
+    while(true) {
+        timer_check();
+    }
+}
+
+// 
+
+#ifdef PCT_TIMER_DEBUG
+
+Timer *testTimer = NULL;
+
+double _timer_test_func(void *data) {
+    double *_data = (double *)data;
+    if (*_data == 2 && testTimer != NULL) {
+        timer_cancel(testTimer);
+        testTimer = NULL;
+    }
+    double delay = *_data == 2 ? 2 : -1;
+    log_debug("timer_run... %f %f", *_data, delay);
+    return delay;
+}
+
+void _timer_test_main() {
+    log_debug("timer_test:");
+    double a = 1;
+    double b = 2;
+    double c = 4;
+    double d = 10;
+    timer_delay(a, &a, &_timer_test_func);
+    timer_delay(b, &b, &_timer_test_func);
+    testTimer = timer_delay(c, &c, &_timer_test_func);
+    timer_delay(d, &d, &_timer_test_func);
+    timer_loop();
+}
+
+#endif
+
+
+// ./files/helpers.h 2024-10-10 20:32:29
 
 // helpers
 

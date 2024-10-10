@@ -12,4 +12,5 @@
 #include "./files/queue.h"
 #include "./files/stack.h"
 #include "./files/array.h"
+#include "./files/timer.h"
 #include "./files/helpers.h"

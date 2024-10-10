@@ -31,6 +31,7 @@
 #define PCT_OBJ_HASHMAP 'H'
 #define PCT_OBJ_FOLIAGE 'F'
 #define PCT_OBJ_BLOCK 'B'
+#define PCT_OBJ_TIMER 'T'
 
 void *pct_mallloc(size_t size)
 {

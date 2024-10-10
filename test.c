@@ -1,4 +1,4 @@
-// #define TEST
+#define TEST
 
 #ifdef TEST
 #include "test.h"
@@ -9,7 +9,7 @@
 
 int main(int argc, char const *argv[])
 {
-    tools_error("TEST");
+    log_info("test...");
     //
     return 0;
 }
