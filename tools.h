@@ -1,5 +1,5 @@
 
-// ./files/header.h 2024-10-12 20:33:39
+// ./files/header.h 2024-10-12 21:19:31
 
 // pure c tools
 
@@ -68,7 +68,7 @@ char PCT_TAG_ERROR[] = "[ERROR]";
 #endif
 
 
-// ./files/log.h 2024-10-12 20:33:39
+// ./files/log.h 2024-10-12 21:19:31
 
 // log
 
@@ -225,7 +225,7 @@ int log_set_func(log_Func *func) {
 }
 
 
-// ./files/tools.h 2024-10-12 20:33:39
+// ./files/tools.h 2024-10-12 21:19:31
 
 // tools
 
@@ -503,7 +503,7 @@ int file_create_directory(char *path)
 #endif
 
 
-// ./files/object.h 2024-10-12 20:33:39
+// ./files/object.h 2024-10-12 21:19:31
 
 
 #ifndef H_PCT_UG_OBJECT
@@ -582,7 +582,7 @@ void Object_print(void *_this)
 #endif
 
 
-// ./files/cstring.h 2024-10-12 20:33:39
+// ./files/cstring.h 2024-10-12 21:19:31
 
 
 // HEADER ---------------------------------------------------------------------
@@ -1061,7 +1061,7 @@ uint64_t strhash(const char *str) {
 
 
 
-// ./files/string.h 2024-10-12 20:33:39
+// ./files/string.h 2024-10-12 21:19:31
 
 // string
 
@@ -1496,7 +1496,7 @@ String *String_trim(String *this)
 #endif
 
 
-// ./files/cursor.h 2024-10-12 20:33:39
+// ./files/cursor.h 2024-10-12 21:19:31
 
 // cursor
 
@@ -1540,7 +1540,7 @@ void Cursor_free(Cursor *this)
 #endif
 
 
-// ./files/hashkey.h 2024-10-12 20:33:39
+// ./files/hashkey.h 2024-10-12 21:19:31
 
 // Hashkey
 
@@ -1585,7 +1585,7 @@ void Hashkey_free(void *_this)
 #endif
 
 
-// ./files/hashmap.h 2024-10-12 20:33:39
+// ./files/hashmap.h 2024-10-12 21:19:31
 
 // hashmap
 
@@ -1781,7 +1781,7 @@ char *Hashmap_toString(Hashmap *this)
 #endif
 
 
-// ./files/foliage.h 2024-10-12 20:33:39
+// ./files/foliage.h 2024-10-12 21:19:31
 
 // token
 
@@ -1839,7 +1839,7 @@ void Foliage_free(Foliage *this)
 #endif
 
 
-// ./files/block.h 2024-10-12 20:33:39
+// ./files/block.h 2024-10-12 21:19:31
 
 // token
 
@@ -1957,7 +1957,7 @@ void Block_free(void *_this)
 #endif
 
 
-// ./files/queue.h 2024-10-12 20:33:39
+// ./files/queue.h 2024-10-12 21:19:31
 
 // queue
 
@@ -2088,7 +2088,7 @@ void *Queue_next(Queue *this, Cursor *cursor)
 #endif
 
 
-// ./files/stack.h 2024-10-12 20:33:39
+// ./files/stack.h 2024-10-12 21:19:31
 
 // stack
 
@@ -2256,7 +2256,7 @@ void Stack_foreachItem(Stack *this, STACK_FOREACH_FUNC func, void *arg) {
 #endif
 
 
-// ./files/array.h 2024-10-12 20:33:39
+// ./files/array.h 2024-10-12 21:19:31
 
 // array
 
@@ -2521,7 +2521,7 @@ char *Array_toString(Array *this)
 #endif
 
 
-// ./files/timer.h 2024-10-12 20:33:39
+// ./files/timer.h 2024-10-12 21:19:31
 
 // timer
 
@@ -2543,6 +2543,8 @@ typedef struct _Timer {
     TIMER_FUNC func;
 } Timer;
 
+typedef double (*TIMER_CLEAN)(void *);
+typedef double (*TIMER_EACH)(void *);
 Timer *_timer_queue_head = NULL;
 
 double _timer_time() {
@@ -2604,11 +2606,13 @@ bool _timer_execute() {
     return false;
 }
 
-bool timer_check() {
-    bool stop = false;
-    while (!stop) stop = _timer_execute();
-    bool finished = _timer_queue_head == NULL;
-    return finished;
+void timer_cancel(Timer *timer) {
+    if (timer == NULL) return;
+    #ifdef PCT_TIMER_DEBUG
+    log_debug("timer_cancel: %f %p", timer->time, timer);
+    #endif
+    timer->data = NULL;
+    timer->func = NULL;
 }
 
 Timer *timer_delay(double seconds, void *data, TIMER_FUNC func) {
@@ -2622,24 +2626,59 @@ Timer *timer_delay(double seconds, void *data, TIMER_FUNC func) {
     timer->data = data;
     timer->func = func;
     timer->next = NULL;
+    #ifdef PCT_TIMER_DEBUG
+    log_debug("timer_delay: %f %p", timer->time, timer);
+    #endif
     return _timer_insert(timer, seconds);
 }
 
-void timer_cancel(Timer *timer) {
-    if (timer == NULL) return;
+void timer_clean(TIMER_CLEAN callback) {
     #ifdef PCT_TIMER_DEBUG
-    log_debug("timer_cancel: %f %p", timer->time, timer);
+    log_debug("timer_clean");
     #endif
-    timer->data = NULL;
-    timer->func = NULL;
+    Timer *current = _timer_queue_head;
+    while (current != NULL) {
+        Timer *next = current->next;
+        if (callback != NULL) {
+            callback(current->data);
+        }
+        timer_cancel(current);
+        current->next = NULL;
+        pct_free(current);
+        current = next;
+    }
+    _timer_queue_head = NULL;
 }
 
-bool timer_loop() {
+void timer_each(TIMER_EACH callback) {
+    #ifdef PCT_TIMER_DEBUG
+    log_debug("timer_each");
+    #endif
+    Timer *current = _timer_queue_head;
+    while (current != NULL) {
+        Timer *next = current->next;
+        if (callback != NULL) {
+            callback(current->data);
+        }
+        current = next;
+    }
+    _timer_queue_head = NULL;
+}
+
+bool timer_check() {
+    bool stop = false;
+    while (!stop) stop = _timer_execute();
+    bool finished = _timer_queue_head == NULL;
+    return finished;
+}
+
+void timer_loop() {
     #ifdef PCT_TIMER_DEBUG
     log_debug("timer_loop:");
     #endif
     while(true) {
-        timer_check();
+        bool finished = timer_check();
+        if (finished) break;
     }
 }
 
@@ -2676,7 +2715,7 @@ void _timer_test_main() {
 #endif
 
 
-// ./files/helpers.h 2024-10-12 20:33:39
+// ./files/helpers.h 2024-10-12 21:19:31
 
 // helpers
 

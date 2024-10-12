@@ -18,6 +18,8 @@ typedef struct _Timer {
     TIMER_FUNC func;
 } Timer;
 
+typedef double (*TIMER_CLEAN)(void *);
+typedef double (*TIMER_EACH)(void *);
 Timer *_timer_queue_head = NULL;
 
 double _timer_time() {
@@ -79,11 +81,13 @@ bool _timer_execute() {
     return false;
 }
 
-bool timer_check() {
-    bool stop = false;
-    while (!stop) stop = _timer_execute();
-    bool finished = _timer_queue_head == NULL;
-    return finished;
+void timer_cancel(Timer *timer) {
+    if (timer == NULL) return;
+    #ifdef PCT_TIMER_DEBUG
+    log_debug("timer_cancel: %f %p", timer->time, timer);
+    #endif
+    timer->data = NULL;
+    timer->func = NULL;
 }
 
 Timer *timer_delay(double seconds, void *data, TIMER_FUNC func) {
@@ -97,24 +101,59 @@ Timer *timer_delay(double seconds, void *data, TIMER_FUNC func) {
     timer->data = data;
     timer->func = func;
     timer->next = NULL;
+    #ifdef PCT_TIMER_DEBUG
+    log_debug("timer_delay: %f %p", timer->time, timer);
+    #endif
     return _timer_insert(timer, seconds);
 }
 
-void timer_cancel(Timer *timer) {
-    if (timer == NULL) return;
+void timer_clean(TIMER_CLEAN callback) {
     #ifdef PCT_TIMER_DEBUG
-    log_debug("timer_cancel: %f %p", timer->time, timer);
+    log_debug("timer_clean");
     #endif
-    timer->data = NULL;
-    timer->func = NULL;
+    Timer *current = _timer_queue_head;
+    while (current != NULL) {
+        Timer *next = current->next;
+        if (callback != NULL) {
+            callback(current->data);
+        }
+        timer_cancel(current);
+        current->next = NULL;
+        pct_free(current);
+        current = next;
+    }
+    _timer_queue_head = NULL;
 }
 
-bool timer_loop() {
+void timer_each(TIMER_EACH callback) {
+    #ifdef PCT_TIMER_DEBUG
+    log_debug("timer_each");
+    #endif
+    Timer *current = _timer_queue_head;
+    while (current != NULL) {
+        Timer *next = current->next;
+        if (callback != NULL) {
+            callback(current->data);
+        }
+        current = next;
+    }
+    _timer_queue_head = NULL;
+}
+
+bool timer_check() {
+    bool stop = false;
+    while (!stop) stop = _timer_execute();
+    bool finished = _timer_queue_head == NULL;
+    return finished;
+}
+
+void timer_loop() {
     #ifdef PCT_TIMER_DEBUG
     log_debug("timer_loop:");
     #endif
     while(true) {
-        timer_check();
+        bool finished = timer_check();
+        if (finished) break;
     }
 }
 
