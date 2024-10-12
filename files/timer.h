@@ -137,7 +137,6 @@ void timer_each(TIMER_EACH callback) {
         }
         current = next;
     }
-    _timer_queue_head = NULL;
 }
 
 bool timer_check() {
