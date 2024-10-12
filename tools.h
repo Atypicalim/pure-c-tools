@@ -1,5 +1,5 @@
 
-// ./files/header.h 2024-10-10 20:36:24
+// ./files/header.h 2024-10-12 20:33:39
 
 // pure c tools
 
@@ -68,7 +68,7 @@ char PCT_TAG_ERROR[] = "[ERROR]";
 #endif
 
 
-// ./files/log.h 2024-10-10 20:36:24
+// ./files/log.h 2024-10-12 20:33:39
 
 // log
 
@@ -225,7 +225,7 @@ int log_set_func(log_Func *func) {
 }
 
 
-// ./files/tools.h 2024-10-10 20:36:24
+// ./files/tools.h 2024-10-12 20:33:39
 
 // tools
 
@@ -503,7 +503,7 @@ int file_create_directory(char *path)
 #endif
 
 
-// ./files/object.h 2024-10-10 20:36:24
+// ./files/object.h 2024-10-12 20:33:39
 
 
 #ifndef H_PCT_UG_OBJECT
@@ -582,7 +582,7 @@ void Object_print(void *_this)
 #endif
 
 
-// ./files/cstring.h 2024-10-10 20:36:24
+// ./files/cstring.h 2024-10-12 20:33:39
 
 
 // HEADER ---------------------------------------------------------------------
@@ -1061,7 +1061,7 @@ uint64_t strhash(const char *str) {
 
 
 
-// ./files/string.h 2024-10-10 20:36:24
+// ./files/string.h 2024-10-12 20:33:39
 
 // string
 
@@ -1496,7 +1496,7 @@ String *String_trim(String *this)
 #endif
 
 
-// ./files/cursor.h 2024-10-10 20:36:24
+// ./files/cursor.h 2024-10-12 20:33:39
 
 // cursor
 
@@ -1540,7 +1540,7 @@ void Cursor_free(Cursor *this)
 #endif
 
 
-// ./files/hashkey.h 2024-10-10 20:36:24
+// ./files/hashkey.h 2024-10-12 20:33:39
 
 // Hashkey
 
@@ -1585,7 +1585,7 @@ void Hashkey_free(void *_this)
 #endif
 
 
-// ./files/hashmap.h 2024-10-10 20:36:24
+// ./files/hashmap.h 2024-10-12 20:33:39
 
 // hashmap
 
@@ -1781,7 +1781,7 @@ char *Hashmap_toString(Hashmap *this)
 #endif
 
 
-// ./files/foliage.h 2024-10-10 20:36:24
+// ./files/foliage.h 2024-10-12 20:33:39
 
 // token
 
@@ -1839,7 +1839,7 @@ void Foliage_free(Foliage *this)
 #endif
 
 
-// ./files/block.h 2024-10-10 20:36:24
+// ./files/block.h 2024-10-12 20:33:39
 
 // token
 
@@ -1957,7 +1957,7 @@ void Block_free(void *_this)
 #endif
 
 
-// ./files/queue.h 2024-10-10 20:36:24
+// ./files/queue.h 2024-10-12 20:33:39
 
 // queue
 
@@ -2088,7 +2088,7 @@ void *Queue_next(Queue *this, Cursor *cursor)
 #endif
 
 
-// ./files/stack.h 2024-10-10 20:36:24
+// ./files/stack.h 2024-10-12 20:33:39
 
 // stack
 
@@ -2256,7 +2256,7 @@ void Stack_foreachItem(Stack *this, STACK_FOREACH_FUNC func, void *arg) {
 #endif
 
 
-// ./files/array.h 2024-10-10 20:36:24
+// ./files/array.h 2024-10-12 20:33:39
 
 // array
 
@@ -2521,7 +2521,7 @@ char *Array_toString(Array *this)
 #endif
 
 
-// ./files/timer.h 2024-10-10 20:36:24
+// ./files/timer.h 2024-10-12 20:33:39
 
 // timer
 
@@ -2621,6 +2621,7 @@ Timer *timer_delay(double seconds, void *data, TIMER_FUNC func) {
     Object_init(timer, PCT_OBJ_TIMER);
     timer->data = data;
     timer->func = func;
+    timer->next = NULL;
     return _timer_insert(timer, seconds);
 }
 
@@ -2675,7 +2676,7 @@ void _timer_test_main() {
 #endif
 
 
-// ./files/helpers.h 2024-10-10 20:36:24
+// ./files/helpers.h 2024-10-12 20:33:39
 
 // helpers
 

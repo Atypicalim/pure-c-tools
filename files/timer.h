@@ -96,6 +96,7 @@ Timer *timer_delay(double seconds, void *data, TIMER_FUNC func) {
     Object_init(timer, PCT_OBJ_TIMER);
     timer->data = data;
     timer->func = func;
+    timer->next = NULL;
     return _timer_insert(timer, seconds);
 }
 
