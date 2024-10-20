@@ -191,6 +191,21 @@ char *file_read(char *path)
     return text;
 }
 
+void file_fetch(char *path, char **_text, int *_size)
+{
+    FILE *file = fopen(path, "rb");
+    if (file == NULL) return NULL;
+    fseek(file, 0, SEEK_END);
+    long size = ftell(file);
+    char *text = (char *)malloc(size + 1);
+    rewind(file);
+    fread(text, sizeof(char), size, file);
+    text[size] = '\0';
+    fclose(file);
+    *_text = text;
+    *_size = size;
+}
+
 bool file_copy(char *path, char *to)
 {
     int BUF_SIZE = 1024;
