@@ -19,6 +19,7 @@
 #include <unistd.h>
 #include <setjmp.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 
 // object types
 #define PCT_OBJ_OBJECT 'O'

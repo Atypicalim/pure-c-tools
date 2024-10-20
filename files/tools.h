@@ -92,18 +92,32 @@ void tools_debug(const char* msg, ...) {
     va_end(lst);
 }
 
+char *_tools_format(char *msg, va_list lst) {
+    va_list lstCopy;
+    va_copy(lstCopy, lst);
+    int bufsz = vsnprintf(NULL, 0, msg, lst);
+    char* text = malloc(bufsz + 1);
+    vsnprintf(text, bufsz + 1, msg, lstCopy);
+    va_end(lst);
+    va_end(lstCopy);
+    return text;
+}
+
 char *tools_format(char *msg, ...)
 {
     va_list lst;
-    va_list lstCopy;
     va_start(lst, msg);
-    va_copy(lstCopy, lst);
-    int bufsz = vsnprintf(NULL, 0, msg, lst);
-    char* t = malloc(bufsz + 1);
-    vsnprintf(t, bufsz + 1, msg, lstCopy);
-    va_end(lst);
-    va_end(lstCopy);
-    return t;
+    _tools_format(msg, lst);
+}
+
+void tools_set_env(char *name, char *value) {
+    char *text = tools_format("%s=%s", name, value);
+    putenv(text);
+    pct_free(text);
+}
+
+char *tools_get_env(char *name) {
+    return getenv(name);
 }
 
 int char_to_int(char c)

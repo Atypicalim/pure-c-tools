@@ -40,4 +40,42 @@ void pct_object_print(void *_this)
     printf("<Object t:%c c:%i p:%p>\n", type, count, this);
 }
 
+void helpers_free(void *pointer) {
+    if (pointer != NULL) pct_free(pointer);
+}
+
+char *system_execute(char *msg, ...) {
+    va_list lst;
+    va_start(lst, msg);
+    char *cmd = _tools_format(msg, lst);
+
+    FILE *file;
+    if ((file = popen(cmd, "r")) == NULL) {
+        pct_free(cmd);
+        return NULL;
+    }
+    int BUFSIZE = 1024;
+    char buf[BUFSIZE];
+    String *out = String_new();
+    char *temp1;
+    char *temp2;
+    while (fgets(buf, BUFSIZE, file) != NULL) {
+        String_appendArr(out, buf);
+    }
+    pclose(file);
+    char *text = String_dump(out);
+    Object_release(out);
+    return text;
+}
+
+char *system_scanf() {
+    char value[1024];
+    scanf(" %[^\n]", value);
+    String *str = String_new();
+    String_appendArr(str, value);
+    char *data = String_dump(str);
+    Object_release(str);
+    return data;
+}
+
 #endif

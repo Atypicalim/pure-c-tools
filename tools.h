@@ -1,5 +1,5 @@
 
-// ./files/header.h 2024-10-20 17:14:54
+// ./files/header.h 2024-10-21 00:21:30
 
 // pure c tools
 
@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include <setjmp.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 
 // object types
 #define PCT_OBJ_OBJECT 'O'
@@ -68,7 +69,7 @@ char PCT_TAG_ERROR[] = "[ERROR]";
 #endif
 
 
-// ./files/log.h 2024-10-20 17:14:54
+// ./files/log.h 2024-10-21 00:21:30
 
 // log
 
@@ -225,7 +226,7 @@ int log_set_func(log_Func *func) {
 }
 
 
-// ./files/tools.h 2024-10-20 17:14:54
+// ./files/tools.h 2024-10-21 00:21:30
 
 // tools
 
@@ -320,18 +321,32 @@ void tools_debug(const char* msg, ...) {
     va_end(lst);
 }
 
+char *_tools_format(char *msg, va_list lst) {
+    va_list lstCopy;
+    va_copy(lstCopy, lst);
+    int bufsz = vsnprintf(NULL, 0, msg, lst);
+    char* text = malloc(bufsz + 1);
+    vsnprintf(text, bufsz + 1, msg, lstCopy);
+    va_end(lst);
+    va_end(lstCopy);
+    return text;
+}
+
 char *tools_format(char *msg, ...)
 {
     va_list lst;
-    va_list lstCopy;
     va_start(lst, msg);
-    va_copy(lstCopy, lst);
-    int bufsz = vsnprintf(NULL, 0, msg, lst);
-    char* t = malloc(bufsz + 1);
-    vsnprintf(t, bufsz + 1, msg, lstCopy);
-    va_end(lst);
-    va_end(lstCopy);
-    return t;
+    _tools_format(msg, lst);
+}
+
+void tools_set_env(char *name, char *value) {
+    char *text = tools_format("%s=%s", name, value);
+    putenv(text);
+    pct_free(text);
+}
+
+char *tools_get_env(char *name) {
+    return getenv(name);
 }
 
 int char_to_int(char c)
@@ -518,7 +533,7 @@ int file_create_directory(char *path)
 #endif
 
 
-// ./files/object.h 2024-10-20 17:14:54
+// ./files/object.h 2024-10-21 00:21:30
 
 
 #ifndef H_PCT_UG_OBJECT
@@ -597,7 +612,7 @@ void Object_print(void *_this)
 #endif
 
 
-// ./files/cstring.h 2024-10-20 17:14:54
+// ./files/cstring.h 2024-10-21 00:21:30
 
 
 // HEADER ---------------------------------------------------------------------
@@ -1076,7 +1091,7 @@ uint64_t strhash(const char *str) {
 
 
 
-// ./files/string.h 2024-10-20 17:14:54
+// ./files/string.h 2024-10-21 00:21:30
 
 // string
 
@@ -1511,7 +1526,7 @@ String *String_trim(String *this)
 #endif
 
 
-// ./files/cursor.h 2024-10-20 17:14:54
+// ./files/cursor.h 2024-10-21 00:21:30
 
 // cursor
 
@@ -1555,7 +1570,7 @@ void Cursor_free(Cursor *this)
 #endif
 
 
-// ./files/hashkey.h 2024-10-20 17:14:54
+// ./files/hashkey.h 2024-10-21 00:21:30
 
 // Hashkey
 
@@ -1600,7 +1615,7 @@ void Hashkey_free(void *_this)
 #endif
 
 
-// ./files/hashmap.h 2024-10-20 17:14:54
+// ./files/hashmap.h 2024-10-21 00:21:30
 
 // hashmap
 
@@ -1796,7 +1811,7 @@ char *Hashmap_toString(Hashmap *this)
 #endif
 
 
-// ./files/foliage.h 2024-10-20 17:14:54
+// ./files/foliage.h 2024-10-21 00:21:30
 
 // token
 
@@ -1854,7 +1869,7 @@ void Foliage_free(Foliage *this)
 #endif
 
 
-// ./files/block.h 2024-10-20 17:14:54
+// ./files/block.h 2024-10-21 00:21:30
 
 // token
 
@@ -1972,7 +1987,7 @@ void Block_free(void *_this)
 #endif
 
 
-// ./files/queue.h 2024-10-20 17:14:54
+// ./files/queue.h 2024-10-21 00:21:30
 
 // queue
 
@@ -2103,7 +2118,7 @@ void *Queue_next(Queue *this, Cursor *cursor)
 #endif
 
 
-// ./files/stack.h 2024-10-20 17:14:54
+// ./files/stack.h 2024-10-21 00:21:30
 
 // stack
 
@@ -2271,7 +2286,7 @@ void Stack_foreachItem(Stack *this, STACK_FOREACH_FUNC func, void *arg) {
 #endif
 
 
-// ./files/array.h 2024-10-20 17:14:54
+// ./files/array.h 2024-10-21 00:21:30
 
 // array
 
@@ -2536,15 +2551,85 @@ char *Array_toString(Array *this)
 #endif
 
 
-// ./files/timer.h 2024-10-20 17:14:54
+// ./files/time.h 2024-10-21 00:21:30
+
+// time
+
+#include <time.h>
+#include <sys/time.h>
+
+double time_clock()
+{
+    clock_t clockTime = clock();
+    double seconds = (double)clockTime / CLOCKS_PER_SEC;
+    return seconds;
+}
+
+double time_second() {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return (double)(tv.tv_sec) + (double)(tv.tv_usec / 1000000.0);
+}
+
+int time_zone() {
+    time_t currentTime = time(NULL);
+    struct tm *localTime = localtime(&currentTime);
+    int hour1 = localTime->tm_hour;
+    struct tm *globalTime = gmtime(&currentTime);
+    int hour2 = globalTime->tm_hour;
+    int distance = hour1 - hour2;
+    return distance;
+}
+
+char *time_time()
+{
+    time_t _time = time(NULL);
+    char *date = ctime(&_time);
+    return date;
+}
+
+// "%Y-%m-%d %H:%M:%S"
+int time_convert_to_seconds(char *str)
+{
+    if (strlen(str) != 19) return -1;
+    int year = atoi(str + 0);
+    int month = atoi(str + 5);
+    int day = atoi(str + 8);
+    int hour = atoi(str + 11);
+    int minute = atoi(str + 14);
+    int second = atoi(str + 17);
+    struct tm info = {0};
+    info.tm_year = year - 1900;
+    info.tm_mon = month - 1;
+    info.tm_mday = day;
+    info.tm_hour = hour;
+    info.tm_min = minute;
+    info.tm_sec = second;
+    info.tm_isdst = -1;
+    time_t  result = mktime(&info);
+    return (int) result;
+}
+
+// "%Y-%m-%d %H:%M:%S"
+char *time_convert_from_seconds(int seconds, char *format)
+{
+    time_t currentTime = seconds >= 0 ? seconds : time(NULL);
+    struct tm *localTime = localtime(&currentTime);
+    const int size = 30;
+    char *data = malloc(size);
+    strftime(data, size, format, localTime);
+    return data;
+}
+
+
+
+// ./files/timer.h 2024-10-21 00:21:30
 
 // timer
 
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdbool.h>
-#include <time.h>
-#include <sys/time.h>
 
 // #define PCT_TIMER_DEBUG
 
@@ -2562,14 +2647,8 @@ typedef double (*TIMER_CLEAN)(void *);
 typedef double (*TIMER_EACH)(void *);
 Timer *_timer_queue_head = NULL;
 
-double _timer_time() {
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    return (double)(tv.tv_sec) + (double)(tv.tv_usec / 1000000.0);
-}
-
 Timer *_timer_insert(Timer *timer, double seconds) {
-    double current = _timer_time();
+    double current = time_second();
     timer->time = current + seconds;
     #ifdef PCT_TIMER_DEBUG
     log_debug("timer_insert: %f + %f = %f  %p", current, seconds, timer->time, timer);
@@ -2599,7 +2678,7 @@ bool _timer_execute() {
     Timer *timer = _timer_queue_head;
     if (timer == NULL) return true;
     // info
-    double current = _timer_time();
+    double current = time_second();
     double nearest = timer->time;
     void *data = timer->data;
     TIMER_FUNC func = timer->func;
@@ -2729,7 +2808,7 @@ void _timer_test_main() {
 #endif
 
 
-// ./files/helpers.h 2024-10-20 17:14:54
+// ./files/helpers.h 2024-10-21 00:21:30
 
 // helpers
 
@@ -2770,6 +2849,44 @@ void pct_object_print(void *_this)
     int type = this->objType;
     int count = this->gcCount;
     printf("<Object t:%c c:%i p:%p>\n", type, count, this);
+}
+
+void helpers_free(void *pointer) {
+    if (pointer != NULL) pct_free(pointer);
+}
+
+char *system_execute(char *msg, ...) {
+    va_list lst;
+    va_start(lst, msg);
+    char *cmd = _tools_format(msg, lst);
+
+    FILE *file;
+    if ((file = popen(cmd, "r")) == NULL) {
+        pct_free(cmd);
+        return NULL;
+    }
+    int BUFSIZE = 1024;
+    char buf[BUFSIZE];
+    String *out = String_new();
+    char *temp1;
+    char *temp2;
+    while (fgets(buf, BUFSIZE, file) != NULL) {
+        String_appendArr(out, buf);
+    }
+    pclose(file);
+    char *text = String_dump(out);
+    Object_release(out);
+    return text;
+}
+
+char *system_scanf() {
+    char value[1024];
+    scanf(" %[^\n]", value);
+    String *str = String_new();
+    String_appendArr(str, value);
+    char *data = String_dump(str);
+    Object_release(str);
+    return data;
 }
 
 #endif

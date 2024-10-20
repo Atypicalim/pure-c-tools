@@ -3,8 +3,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdbool.h>
-#include <time.h>
-#include <sys/time.h>
 
 // #define PCT_TIMER_DEBUG
 
@@ -22,14 +20,8 @@ typedef double (*TIMER_CLEAN)(void *);
 typedef double (*TIMER_EACH)(void *);
 Timer *_timer_queue_head = NULL;
 
-double _timer_time() {
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    return (double)(tv.tv_sec) + (double)(tv.tv_usec / 1000000.0);
-}
-
 Timer *_timer_insert(Timer *timer, double seconds) {
-    double current = _timer_time();
+    double current = time_second();
     timer->time = current + seconds;
     #ifdef PCT_TIMER_DEBUG
     log_debug("timer_insert: %f + %f = %f  %p", current, seconds, timer->time, timer);
@@ -59,7 +51,7 @@ bool _timer_execute() {
     Timer *timer = _timer_queue_head;
     if (timer == NULL) return true;
     // info
-    double current = _timer_time();
+    double current = time_second();
     double nearest = timer->time;
     void *data = timer->data;
     TIMER_FUNC func = timer->func;
