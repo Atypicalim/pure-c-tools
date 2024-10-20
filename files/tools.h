@@ -194,7 +194,7 @@ char *file_read(char *path)
 void file_fetch(char *path, char **_text, int *_size)
 {
     FILE *file = fopen(path, "rb");
-    if (file == NULL) return NULL;
+    if (file == NULL) return;
     fseek(file, 0, SEEK_END);
     long size = ftell(file);
     char *text = (char *)malloc(size + 1);

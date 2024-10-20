@@ -1,5 +1,5 @@
 
-// ./files/header.h 2024-10-20 17:01:53
+// ./files/header.h 2024-10-20 17:14:54
 
 // pure c tools
 
@@ -68,7 +68,7 @@ char PCT_TAG_ERROR[] = "[ERROR]";
 #endif
 
 
-// ./files/log.h 2024-10-20 17:01:53
+// ./files/log.h 2024-10-20 17:14:54
 
 // log
 
@@ -225,7 +225,7 @@ int log_set_func(log_Func *func) {
 }
 
 
-// ./files/tools.h 2024-10-20 17:01:53
+// ./files/tools.h 2024-10-20 17:14:54
 
 // tools
 
@@ -422,7 +422,7 @@ char *file_read(char *path)
 void file_fetch(char *path, char **_text, int *_size)
 {
     FILE *file = fopen(path, "rb");
-    if (file == NULL) return NULL;
+    if (file == NULL) return;
     fseek(file, 0, SEEK_END);
     long size = ftell(file);
     char *text = (char *)malloc(size + 1);
@@ -518,7 +518,7 @@ int file_create_directory(char *path)
 #endif
 
 
-// ./files/object.h 2024-10-20 17:01:53
+// ./files/object.h 2024-10-20 17:14:54
 
 
 #ifndef H_PCT_UG_OBJECT
@@ -597,7 +597,7 @@ void Object_print(void *_this)
 #endif
 
 
-// ./files/cstring.h 2024-10-20 17:01:53
+// ./files/cstring.h 2024-10-20 17:14:54
 
 
 // HEADER ---------------------------------------------------------------------
@@ -1076,7 +1076,7 @@ uint64_t strhash(const char *str) {
 
 
 
-// ./files/string.h 2024-10-20 17:01:53
+// ./files/string.h 2024-10-20 17:14:54
 
 // string
 
@@ -1511,7 +1511,7 @@ String *String_trim(String *this)
 #endif
 
 
-// ./files/cursor.h 2024-10-20 17:01:53
+// ./files/cursor.h 2024-10-20 17:14:54
 
 // cursor
 
@@ -1555,7 +1555,7 @@ void Cursor_free(Cursor *this)
 #endif
 
 
-// ./files/hashkey.h 2024-10-20 17:01:53
+// ./files/hashkey.h 2024-10-20 17:14:54
 
 // Hashkey
 
@@ -1600,7 +1600,7 @@ void Hashkey_free(void *_this)
 #endif
 
 
-// ./files/hashmap.h 2024-10-20 17:01:53
+// ./files/hashmap.h 2024-10-20 17:14:54
 
 // hashmap
 
@@ -1796,7 +1796,7 @@ char *Hashmap_toString(Hashmap *this)
 #endif
 
 
-// ./files/foliage.h 2024-10-20 17:01:53
+// ./files/foliage.h 2024-10-20 17:14:54
 
 // token
 
@@ -1854,7 +1854,7 @@ void Foliage_free(Foliage *this)
 #endif
 
 
-// ./files/block.h 2024-10-20 17:01:53
+// ./files/block.h 2024-10-20 17:14:54
 
 // token
 
@@ -1972,7 +1972,7 @@ void Block_free(void *_this)
 #endif
 
 
-// ./files/queue.h 2024-10-20 17:01:53
+// ./files/queue.h 2024-10-20 17:14:54
 
 // queue
 
@@ -2103,7 +2103,7 @@ void *Queue_next(Queue *this, Cursor *cursor)
 #endif
 
 
-// ./files/stack.h 2024-10-20 17:01:53
+// ./files/stack.h 2024-10-20 17:14:54
 
 // stack
 
@@ -2271,7 +2271,7 @@ void Stack_foreachItem(Stack *this, STACK_FOREACH_FUNC func, void *arg) {
 #endif
 
 
-// ./files/array.h 2024-10-20 17:01:53
+// ./files/array.h 2024-10-20 17:14:54
 
 // array
 
@@ -2536,7 +2536,7 @@ char *Array_toString(Array *this)
 #endif
 
 
-// ./files/timer.h 2024-10-20 17:01:53
+// ./files/timer.h 2024-10-20 17:14:54
 
 // timer
 
@@ -2729,7 +2729,7 @@ void _timer_test_main() {
 #endif
 
 
-// ./files/helpers.h 2024-10-20 17:01:53
+// ./files/helpers.h 2024-10-20 17:14:54
 
 // helpers
 
